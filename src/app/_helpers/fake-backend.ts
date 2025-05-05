@@ -6,18 +6,11 @@ import { delay, materialize, dematerialize } from 'rxjs/operators';
 import { AlertService } from '@app/_services';
 import { Role } from '@app/_models';
 
+// @ts-ignore: Disable implicit any warnings for this file
+/* tslint:disable:no-implicit-any */
+// array in local storage for accounts
 const accountsKey = 'angular-10-signup-verification-boilerplate-accounts';
-const departmentsKey = 'angular-user-management-departments';
-const employeesKey = 'angular-user-management-employees';
-const workflowsKey = 'angular-user-management-workflows';
-const requestsKey = 'angular-user-management-requests';
-
 let accounts = JSON.parse(localStorage.getItem(accountsKey) || '[]');
-let departments = JSON.parse(localStorage.getItem(departmentsKey) || '[]');
-let employees = JSON.parse(localStorage.getItem(employeesKey) || '[]');
-let workflows = JSON.parse(localStorage.getItem(workflowsKey) || '[]');
-let requests = JSON.parse(localStorage.getItem(requestsKey) || '[]');
-
 @Injectable()
 export class FakeBackendInterceptor implements HttpInterceptor {
     constructor(private alertService: AlertService) { }
@@ -27,7 +20,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         const alertService = this.alertService;
 
         return handleRoute();
-        
+
         function handleRoute() {
             switch (true) {
                 case url.endsWith('/accounts/authenticate') && method === 'POST':
@@ -56,58 +49,8 @@ export class FakeBackendInterceptor implements HttpInterceptor {
                     return updateAccount();
                 case url.match(/\/accounts\/\d+$/) && method === 'DELETE':
                     return deleteAccount();
-                
-                // Department routes
-                case url.endsWith('/departments') && method === 'GET':
-                    return getDepartments();
-                case url.match(/\/departments\/\d+$/) && method === 'GET':
-                    return getDepartmentById();
-                case url.endsWith('/departments') && method === 'POST':
-                    return createDepartment();
-                case url.match(/\/departments\/\d+$/) && method === 'PUT':
-                    return updateDepartment();
-                case url.match(/\/departments\/\d+$/) && method === 'DELETE':
-                    return deleteDepartment();
-                
-                // Employee routes
-                case url.endsWith('/employees') && method === 'GET':
-                    return getEmployees();
-                case url.match(/\/employees\/\d+$/) && method === 'GET':
-                    return getEmployeeById();
-                case url.endsWith('/employees') && method === 'POST':
-                    return createEmployee();
-                case url.match(/\/employees\/\d+$/) && method === 'PUT':
-                    return updateEmployee();
-                case url.match(/\/employees\/\d+\/transfer$/) && method === 'PUT':
-                    return transferEmployee();
-                case url.match(/\/employees\/\d+$/) && method === 'DELETE':
-                    return deleteEmployee();
-                
-                // Workflow routes
-                case url.endsWith('/workflows') && method === 'GET':
-                    return getWorkflows();
-                case url.match(/\/workflows\/\d+$/) && method === 'GET':
-                    return getWorkflowById();
-                case url.endsWith('/workflows') && method === 'POST':
-                    return createWorkflow();
-                case url.match(/\/workflows\/\d+$/) && method === 'PUT':
-                    return updateWorkflow();
-                case url.match(/\/workflows\/\d+$/) && method === 'DELETE':
-                    return deleteWorkflow();
-                
-                // Request routes
-                case url.endsWith('/requests') && method === 'GET':
-                    return getRequests();
-                case url.match(/\/requests\/\d+$/) && method === 'GET':
-                    return getRequestById();
-                case url.endsWith('/requests') && method === 'POST':
-                    return createRequest();
-                case url.match(/\/requests\/\d+$/) && method === 'PUT':
-                    return updateRequest();
-                case url.match(/\/requests\/\d+$/) && method === 'DELETE':
-                    return deleteRequest();
-                
                 default:
+                    // pass through any requests not handled above
                     return next.handle(request);
             }
         }
@@ -115,14 +58,15 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         // route functions
 
         function authenticate() {
-            const { email, password }: { email: string; password: string } = body;
-            const account = accounts.find((x: any) => x.email === email && x.password === password && x.isVerified);
-        
+            const { email, password } = body;
+            const account = accounts.find(x => x.email === email && x.password === password && x.isVerified);
+            
             if (!account) return error('Email or password is incorrect');
-        
+
+            // add refresh token to account
             account.refreshTokens.push(generateRefreshToken());
             localStorage.setItem(accountsKey, JSON.stringify(accounts));
-        
+
             return ok({
                 ...basicDetails(account),
                 jwtToken: generateJwtToken(account)
@@ -130,18 +74,19 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         }
 
         function refreshToken() {
-            const refreshToken: string | null = getRefreshToken();
-        
+            const refreshToken = getRefreshToken();
+            
             if (!refreshToken) return unauthorized();
-        
-            const account = accounts.find((x: any) => x.refreshTokens.includes(refreshToken));
-        
+
+            const account = accounts.find(x => x.refreshTokens.includes(refreshToken));
+            
             if (!account) return unauthorized();
-        
-            account.refreshTokens = account.refreshTokens.filter((x: string) => x !== refreshToken);
+
+            // replace old refresh token with a new one and save
+            account.refreshTokens = account.refreshTokens.filter(x => x !== refreshToken);
             account.refreshTokens.push(generateRefreshToken());
             localStorage.setItem(accountsKey, JSON.stringify(accounts));
-        
+
             return ok({
                 ...basicDetails(account),
                 jwtToken: generateJwtToken(account)
@@ -152,10 +97,10 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             if (!isAuthenticated()) return unauthorized();
             
             const refreshToken = getRefreshToken();
-            const account = accounts.find((x: any) => x.refreshTokens.includes(refreshToken));
+            const account = accounts.find(x => x.refreshTokens.includes(refreshToken));
             
             // revoke token and save
-            account.refreshTokens = account.refreshTokens.filter((x: any) => x !== refreshToken);
+            account.refreshTokens = account.refreshTokens.filter(x => x !== refreshToken);
             localStorage.setItem(accountsKey, JSON.stringify(accounts));
 
             return ok({});
@@ -164,14 +109,14 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         function register() {
             const account = body;
             
-            if (accounts.find((x: any) => x.email === account.email)) {
+            if (accounts.find(x => x.email === account.email)) {
                 // display email already registered "email" in alert
                 setTimeout(() => {
                     alertService.info(`
                         <h4>Email Already Registered</h4>
                         <p>Your email ${account.email} is already registered.</p>
                         <p>If you forgot your password please visit the <a href="${location.origin}/account/forgot-password">forgot password</a> page.</p>
-                        <div><strong>NOTE:</strong> If you read this, you stupid!</div>
+                        <div><strong>NOTE:</strong> The fake backend displayed this "email" so you can test without an api. A real backend would send a real email.</div>
                     `, { autoClose: false });
                 }, 1000);
                 
@@ -203,7 +148,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
                     <p>Thanks for registering!</p>
                     <p>Please click the below link to verify your email address:</p>
                     <p><a href="${verifyUrl}">${verifyUrl}</a></p>
-                    <div><strong>NOTE:</strong> If you read this, you stupid!</div>
+                    <div><strong>NOTE:</strong> The fake backend displayed this "email" so you can test without an api. A real backend would send a real email.</div>
                 `, { autoClose: false });
             }, 1000);
 
@@ -212,7 +157,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
         function verifyEmail() {
             const { token } = body;
-            const account = accounts.find((x: any) => !!x.verificationToken && x.verificationToken === token);
+            const account = accounts.find(x => !!x.verificationToken && x.verificationToken === token);
             
             if (!account) return error('Verification failed');
             
@@ -225,7 +170,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
         function forgotPassword() {
             const { email } = body;
-            const account = accounts.find((x: any) => x.email === email);
+            const account = accounts.find(x => x.email === email);
             
             // always return ok() response to prevent email enumeration
             if (!account) return ok({});
@@ -234,7 +179,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             account.resetToken = new Date().getTime().toString();
             account.resetTokenExpires = new Date(Date.now() + 24*60*60*1000).toISOString();
             localStorage.setItem(accountsKey, JSON.stringify(accounts));
-
+            
             // display password reset email in alert
             setTimeout(() => {
                 const resetUrl = `${location.origin}/account/reset-password?token=${account.resetToken}`;
@@ -242,7 +187,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
                     <h4>Reset Password Email</h4>
                     <p>Please click the below link to reset your password, the link will be valid for 1 day:</p>
                     <p><a href="${resetUrl}">${resetUrl}</a></p>
-                    <div><strong>NOTE:</strong> If you read this, you stupid!</div>
+                    <div><strong>NOTE:</strong> The fake backend displayed this "email" so you can test without an api. A real backend would send a real email.</div>
                 `, { autoClose: false });
             }, 1000);
             
@@ -251,7 +196,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
         function validateResetToken() {
             const { token } = body;
-            const account = accounts.find((x: any) =>
+            const account = accounts.find(x => 
                 !!x.resetToken && x.resetToken === token &&
                 new Date() < new Date(x.resetTokenExpires)
             );
@@ -263,7 +208,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
         function resetPassword() {
             const { token, password } = body;
-            const account = accounts.find((x: any) =>
+            const account = accounts.find(x => 
                 !!x.resetToken && x.resetToken === token &&
                 new Date() < new Date(x.resetTokenExpires)
             );
@@ -282,13 +227,13 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 
         function getAccounts() {
             if (!isAuthenticated()) return unauthorized();
-            return ok(accounts.map((x: any) => basicDetails(x)));
+            return ok(accounts.map(x => basicDetails(x)));
         }
 
         function getAccountById() {
             if (!isAuthenticated()) return unauthorized();
 
-            let account = accounts.find((x: any) => x.id === idFromUrl());
+            let account = accounts.find(x => x.id === idFromUrl());
             
             // user accounts can get own profile and admin accounts can get all profiles
             if (account.id !== currentAccount().id && !isAuthorized(Role.Admin)) {
@@ -302,7 +247,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             if (!isAuthorized(Role.Admin)) return unauthorized();
         
             const account = body;
-            if (accounts.find((x: any) => x.email === account.email)) {
+            if (accounts.find(x => x.email === account.email)) {
                 return error(`Email ${account.email} is already registered`);
             }
             
@@ -322,7 +267,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             if (!isAuthenticated()) return unauthorized();
             
             let params = body;
-            let account = accounts.find((x: any) => x.id === idFromUrl());
+            let account = accounts.find(x => x.id === idFromUrl());
             
             // user accounts can update own profile and admin accounts can update all profiles
             if (account.id !== currentAccount().id && !isAuthorized(Role.Admin)) {
@@ -346,7 +291,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         function deleteAccount() {
             if (!isAuthenticated()) return unauthorized();
             
-            let account = accounts.find((x: any) => x.id === idFromUrl());
+            let account = accounts.find(x => x.id === idFromUrl());
             
             // user accounts can delete own account and admin accounts can delete any account
             if (account.id !== currentAccount().id && !isAuthorized(Role.Admin)) {
@@ -354,571 +299,39 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             }
             
             // delete account then save
-            accounts = accounts.filter((x: any) => x.id !== idFromUrl());
+            accounts = accounts.filter(x => x.id !== idFromUrl());
             localStorage.setItem(accountsKey, JSON.stringify(accounts));
-            return ok({});
-        }
-
-        // Department-related functions
-        function getDepartments() {
-            if (!isAuthenticated()) return unauthorized();
-            return ok(departments);
-        }
-
-        function getDepartmentById() {
-            if (!isAuthenticated()) return unauthorized();
-            
-            const id = idFromUrl();
-            const department = departments.find((x: any) => x.id === id);
-            
-            if (!department) return notFound();
-            
-            return ok(department);
-        }
-
-        function createDepartment() {
-            if (!isAuthenticated() || !isAuthorized(Role.Admin)) return unauthorized();
-            
-            const department = body;
-            
-            // Check if department name already exists
-            if (departments.find((x: any) => x.name.toLowerCase() === department.name.toLowerCase())) {
-                return error(`Department name '${department.name}' already exists`);
-            }
-            
-            department.id = departments.length ? Math.max(...departments.map((x: any) => x.id)) + 1 : 1;
-            departments.push(department);
-            localStorage.setItem(departmentsKey, JSON.stringify(departments));
-            
-            return ok(department);
-        }
-
-        function updateDepartment() {
-            if (!isAuthenticated() || !isAuthorized(Role.Admin)) return unauthorized();
-            
-            const id = idFromUrl();
-            const department = departments.find((x: any) => x.id === id);
-            
-            if (!department) return notFound();
-            
-            const params = body;
-            
-            // Check if department name already exists (excluding current department)
-            if (params.name && 
-                departments.find((x: any) => x.id !== id && x.name.toLowerCase() === params.name.toLowerCase())) {
-                return error(`Department name '${params.name}' already exists`);
-            }
-            
-            Object.assign(department, params);
-            localStorage.setItem(departmentsKey, JSON.stringify(departments));
-            
-            return ok(department);
-        }
-
-        function deleteDepartment() {
-            if (!isAuthenticated() || !isAuthorized(Role.Admin)) return unauthorized();
-            
-            const id = idFromUrl();
-            
-            // Check if department has employees
-            if (employees.some((x: any) => x.departmentId === id)) {
-                return error('Cannot delete department with employees');
-            }
-            
-            departments = departments.filter((x: any) => x.id !== id);
-            localStorage.setItem(departmentsKey, JSON.stringify(departments));
-            
-            return ok({});
-        }
-
-        // Employee-related functions
-        function getEmployees() {
-            if (!isAuthenticated()) return unauthorized();
-            
-            // Add account and department details to employees
-            const employeesWithDetails = employees.map((employee: any) => {
-                return {
-                    ...employee,
-                    account: accounts.find((a: any) => a.id === employee.accountId),
-                    department: departments.find((d: any) => d.id === employee.departmentId)
-                };
-            });
-            
-            return ok(employeesWithDetails);
-        }
-
-        function getEmployeeById() {
-            if (!isAuthenticated()) return unauthorized();
-            
-            const id = idFromUrl();
-            const employee = employees.find((x: any) => x.id === id);
-            
-            if (!employee) return notFound();
-            
-            // Add account and department details
-            const employeeWithDetails = {
-                ...employee,
-                account: accounts.find((a: any) => a.id === employee.accountId),
-                department: departments.find((d: any) => d.id === employee.departmentId)
-            };
-            
-            return ok(employeeWithDetails);
-        }
-
-        function createEmployee() {
-            if (!isAuthenticated() || !isAuthorized(Role.Admin)) return unauthorized();
-            
-            const employee = body;
-            
-            // Convert string ids to numbers
-            employee.accountId = parseInt(employee.accountId);
-            employee.departmentId = parseInt(employee.departmentId);
-            
-            // Validate account and department exist
-            if (!accounts.some((x: any) => x.id === employee.accountId)) {
-                return error('Account not found');
-            }
-            
-            if (!departments.some((x: any) => x.id === employee.departmentId)) {
-                return error('Department not found');
-            }
-            
-            // Check if account already has an employee record
-            if (employees.some((x: any) => x.accountId === employee.accountId)) {
-                return error('Account already has an employee record');
-            }
-            
-            // Generate employee ID if not provided
-            if (!employee.employeeId) {
-                employee.employeeId = 'EMP' + String(employees.length + 1).padStart(3, '0');
-            }
-            
-            employee.id = employees.length ? Math.max(...employees.map((x: any) => x.id)) + 1 : 1;
-            employee.created = new Date().toISOString();
-            employee.status = employee.status || 'Active';
-            employees.push(employee);
-            localStorage.setItem(employeesKey, JSON.stringify(employees));
-            
-            // If this is a new employee, create an onboarding workflow
-            const workflow = {
-                id: workflows.length ? Math.max(...workflows.map((x: any) => x.id)) + 1 : 1,
-                employeeId: employee.id,
-                type: 'Onboarding',
-                description: 'Initial onboarding process',
-                status: 'Pending',
-                created: new Date().toISOString()
-            };
-            
-            workflows.push(workflow);
-            localStorage.setItem(workflowsKey, JSON.stringify(workflows));
-            
-            return ok(employee);
-        }
-
-        function updateEmployee() {
-            if (!isAuthenticated() || !isAuthorized(Role.Admin)) return unauthorized();
-            
-            const id = idFromUrl();
-            const employee = employees.find((x: any) => x.id === id);
-            
-            if (!employee) return notFound();
-            
-            const params = body;
-            
-            // Convert string id to number if present
-            if (params.departmentId) {
-                params.departmentId = parseInt(params.departmentId);
-                
-                // Validate department exists
-                if (!departments.some((x: any) => x.id === params.departmentId)) {
-                    return error('Department not found');
-                }
-            }
-            
-            Object.assign(employee, params);
-            localStorage.setItem(employeesKey, JSON.stringify(employees));
-            
-            return ok(employee);
-        }
-
-        function transferEmployee() {
-            if (!isAuthenticated() || !isAuthorized(Role.Admin)) return unauthorized();
-            
-            const id = idFromUrl();
-            const employee = employees.find((x: any) => x.id === id);
-            
-            if (!employee) return notFound();
-            
-            const { departmentId } = body;
-            const targetDeptId = parseInt(departmentId);
-            
-            // Validate department exists
-            if (!departments.some((x: any) => x.id === targetDeptId)) {
-                return error('Department not found');
-            }
-            
-            // Don't transfer if already in this department
-            if (employee.departmentId === targetDeptId) {
-                return error('Employee is already in this department');
-            }
-            
-            // Update employee department
-            employee.departmentId = targetDeptId;
-            localStorage.setItem(employeesKey, JSON.stringify(employees));
-            
-            // Create a transfer workflow
-            const workflow = {
-                id: workflows.length ? Math.max(...workflows.map((x: any) => x.id)) + 1 : 1,
-                employeeId: employee.id,
-                type: 'Transfer',
-                description: `Transfer to ${departments.find((x: any) => x.id === targetDeptId)?.name}`,
-                status: 'Pending',
-                created: new Date().toISOString()
-            };
-            
-            workflows.push(workflow);
-            localStorage.setItem(workflowsKey, JSON.stringify(workflows));
-            
-            return ok(employee);
-        }
-
-        function deleteEmployee() {
-            if (!isAuthenticated() || !isAuthorized(Role.Admin)) return unauthorized();
-            
-            const id = idFromUrl();
-            
-            // Check for related workflows and requests
-            if (workflows.some((x: any) => x.employeeId === id)) {
-                return error('Cannot delete employee with workflows');
-            }
-            
-            if (requests.some((x: any) => x.employeeId === id)) {
-                return error('Cannot delete employee with requests');
-            }
-            
-            employees = employees.filter((x: any) => x.id !== id);
-            localStorage.setItem(employeesKey, JSON.stringify(employees));
-            
-            return ok({});
-        }
-
-        // Workflow-related functions
-        function getWorkflows() {
-            if (!isAuthenticated()) return unauthorized();
-            
-            const workflowsWithDetails = workflows.map((workflow: any) => {
-                const employee = employees.find((e: any) => e.id === workflow.employeeId);
-                return {
-                    ...workflow,
-                    employee: employee ? {
-                        ...employee,
-                        account: accounts.find((a: any) => a.id === employee.accountId),
-                        department: departments.find((d: any) => d.id === employee.departmentId)
-                    } : undefined
-                };
-            });
-            
-            return ok(workflowsWithDetails);
-        }
-
-        function getWorkflowById() {
-            if (!isAuthenticated()) return unauthorized();
-            
-            const id = idFromUrl();
-            const workflow = workflows.find((x: any) => x.id === id);
-            
-            if (!workflow) return notFound();
-            
-            const employee = employees.find((e: any) => e.id === workflow.employeeId);
-            
-            const workflowWithDetails = {
-                ...workflow,
-                employee: employee ? {
-                    ...employee,
-                    account: accounts.find((a: any) => a.id === employee.accountId),
-                    department: departments.find((d: any) => d.id === employee.departmentId)
-                } : undefined
-            };
-            
-            return ok(workflowWithDetails);
-        }
-
-        function createWorkflow() {
-            if (!isAuthenticated()) return unauthorized();
-            
-            const workflow = body;
-            
-            // Convert employee ID to number
-            workflow.employeeId = parseInt(workflow.employeeId);
-            
-            // Validate employee exists
-            if (!employees.some((x: any) => x.id === workflow.employeeId)) {
-                return error('Employee not found');
-            }
-            
-            workflow.id = workflows.length ? Math.max(...workflows.map((x: any) => x.id)) + 1 : 1;
-            workflow.status = 'Pending';
-            workflow.created = new Date().toISOString();
-            
-            workflows.push(workflow);
-            localStorage.setItem(workflowsKey, JSON.stringify(workflows));
-            
-            return ok(workflow);
-        }
-
-        function updateWorkflow() {
-            if (!isAuthenticated()) return unauthorized();
-            
-            const id = idFromUrl();
-            const workflow = workflows.find((x: any) => x.id === id);
-            
-            if (!workflow) return notFound();
-            
-            const params = body;
-            
-            // Only allow updating status and description
-            if (params.status) workflow.status = params.status;
-            if (params.description !== undefined) workflow.description = params.description;
-            
-            localStorage.setItem(workflowsKey, JSON.stringify(workflows));
-            
-            return ok(workflow);
-        }
-
-        function deleteWorkflow() {
-            if (!isAuthenticated() || !isAuthorized(Role.Admin)) return unauthorized();
-            
-            const id = idFromUrl();
-            
-            workflows = workflows.filter((x: any) => x.id !== id);
-            localStorage.setItem(workflowsKey, JSON.stringify(workflows));
-            
-            return ok({});
-        }
-
-        // Request-related functions
-        function getRequests() {
-            if (!isAuthenticated()) return unauthorized();
-            
-            const requestsWithDetails = requests.map((request: any) => {
-                const employee = employees.find((e: any) => e.id === request.employeeId);
-                return {
-                    ...request,
-                    employee: employee ? {
-                        ...employee,
-                        account: accounts.find((a: any) => a.id === employee.accountId),
-                        department: departments.find((d: any) => d.id === employee.departmentId)
-                    } : undefined
-                };
-            });
-            
-            // Filter to only show admin's requests or user's own requests
-            const currentUser = currentAccount();
-            if (currentUser.role !== Role.Admin) {
-                const currentEmployee = employees.find((e: any) => e.accountId === currentUser.id);
-                if (currentEmployee) {
-                    return ok(requestsWithDetails.filter((r: any) => r.employeeId === currentEmployee.id));
-                }
-                return ok([]);
-            }
-            
-            return ok(requestsWithDetails);
-        }
-
-        function getRequestById() {
-            if (!isAuthenticated()) return unauthorized();
-            
-            const id = idFromUrl();
-            const request = requests.find((x: any) => x.id === id);
-            
-            if (!request) return notFound();
-            
-            // Check if user is admin or the request belongs to the user
-            const currentUser = currentAccount();
-            if (currentUser.role !== Role.Admin) {
-                const currentEmployee = employees.find((e: any) => e.accountId === currentUser.id);
-                if (!currentEmployee || currentEmployee.id !== request.employeeId) {
-                    return unauthorized();
-                }
-            }
-            
-            const employee = employees.find((e: any) => e.id === request.employeeId);
-            
-            const requestWithDetails = {
-                ...request,
-                employee: employee ? {
-                    ...employee,
-                    account: accounts.find((a: any) => a.id === employee.accountId),
-                    department: departments.find((d: any) => d.id === employee.departmentId)
-                } : undefined
-            };
-            
-            return ok(requestWithDetails);
-        }
-
-        function createRequest() {
-            if (!isAuthenticated()) return unauthorized();
-            
-            const request = body;
-            
-            // Get the current employee based on the logged-in user
-            const currentUser = currentAccount();
-            const currentEmployee = employees.find((e: any) => e.accountId === currentUser.id);
-            
-            // If not admin, force employeeId to be the current user's employee ID
-            if (currentUser.role !== Role.Admin) {
-                if (!currentEmployee) return error('No employee record found for your account');
-                request.employeeId = currentEmployee.id;
-            } else if (request.employeeId) {
-                // Admin can specify an employee
-                request.employeeId = parseInt(request.employeeId);
-                
-                // Validate employee exists
-                if (!employees.some((x: any) => x.id === request.employeeId)) {
-                    return error('Employee not found');
-                }
-            } else {
-                return error('Employee ID is required');
-            }
-            
-            request.id = requests.length ? Math.max(...requests.map((x: any) => x.id)) + 1 : 1;
-            request.status = 'Pending';
-            request.created = new Date().toISOString();
-            
-            // Handle request items if present
-            if (request.requestItems && Array.isArray(request.requestItems)) {
-                request.requestItems.forEach((item: any, index: number) => {
-                    item.id = index + 1;
-                    item.requestId = request.id;
-                });
-            }
-            
-            requests.push(request);
-            localStorage.setItem(requestsKey, JSON.stringify(requests));
-            
-            return ok(request);
-        }
-
-        function updateRequest() {
-            if (!isAuthenticated()) return unauthorized();
-            
-            const id = idFromUrl();
-            const request = requests.find((x: any) => x.id === id);
-            
-            if (!request) return notFound();
-            
-            // Check permissions
-            const currentUser = currentAccount();
-            if (currentUser.role !== Role.Admin) {
-                const currentEmployee = employees.find((e: any) => e.accountId === currentUser.id);
-                if (!currentEmployee || currentEmployee.id !== request.employeeId) {
-                    return unauthorized();
-                }
-                
-                // Regular users can only update the description and request items
-                const params = {
-                    description: body.description,
-                    requestItems: body.requestItems
-                };
-                
-                // Update request items
-                if (params.requestItems && Array.isArray(params.requestItems)) {
-                    params.requestItems.forEach((item: any, index: number) => {
-                        if (!item.id) item.id = index + 1;
-                        item.requestId = request.id;
-                    });
-                    request.requestItems = params.requestItems;
-                }
-                
-                if (params.description !== undefined) request.description = params.description;
-            } else {
-                // Admins can update everything
-                const params = body;
-                
-                // Update request items if present
-                if (params.requestItems && Array.isArray(params.requestItems)) {
-                    params.requestItems.forEach((item: any, index: number) => {
-                        if (!item.id) item.id = index + 1;
-                        item.requestId = request.id;
-                    });
-                    request.requestItems = params.requestItems;
-                    delete params.requestItems;
-                }
-                
-                // Update other fields
-                Object.assign(request, params);
-            }
-            
-            localStorage.setItem(requestsKey, JSON.stringify(requests));
-            
-            return ok(request);
-        }
-
-        function deleteRequest() {
-            if (!isAuthenticated()) return unauthorized();
-            
-            const id = idFromUrl();
-            const request = requests.find((x: any) => x.id === id);
-            
-            if (!request) return notFound();
-            
-            // Check permissions
-            const currentUser = currentAccount();
-            if (currentUser.role !== Role.Admin) {
-                const currentEmployee = employees.find((e: any) => e.accountId === currentUser.id);
-                if (!currentEmployee || currentEmployee.id !== request.employeeId || request.status !== 'Pending') {
-                    return unauthorized();
-                }
-            }
-            
-            requests = requests.filter((x: any) => x.id !== id);
-            localStorage.setItem(requestsKey, JSON.stringify(requests));
-            
             return ok({});
         }
 
         // helper functions
 
-        function ok(body: any): Observable<HttpEvent<any>> {
+        function ok(body) {
             return of(new HttpResponse({ status: 200, body }))
                 .pipe(delay(500)); // delay observable to simulate server api call
         }
 
-        function error(message: string): Observable<never> {
+        function error(message) {
             return throwError({ error: { message } })
                 .pipe(materialize(), delay(500), dematerialize());
-            // call materialize and dematerialize to ensure delay even if an error is thrown
+                // call materialize and dematerialize to ensure delay even if an error is thrown (https://github.com/Reactive-Extensions/RxJS/issues/648);
         }
 
-        function unauthorized(): Observable<never> {
+        function unauthorized() {
             return throwError({ status: 401, error: { message: 'Unauthorized' } })
                 .pipe(materialize(), delay(500), dematerialize());
         }
 
-        function notFound(): Observable<never> {
-            return throwError({ status: 404, error: { message: 'Not Found' } })
-                .pipe(materialize(), delay(500), dematerialize());
-        }
-
-        function basicDetails(account: any): {
-            id: number;
-            title: string;
-            firstName: string;
-            lastName: string;
-            email: string;
-            role: Role;
-            dateCreated: string;
-            isVerified: boolean;
-        } {
+        function basicDetails(account) {
             const { id, title, firstName, lastName, email, role, dateCreated, isVerified } = account;
             return { id, title, firstName, lastName, email, role, dateCreated, isVerified };
         }
 
-        function isAuthenticated(): boolean {
+        function isAuthenticated() {
             return !!currentAccount();
         }
 
-        function isAuthorized(role: Role): boolean {
+        function isAuthorized(role) {
             const account = currentAccount();
             if (!account) return false;
             return account.role === role;
@@ -932,14 +345,20 @@ export class FakeBackendInterceptor implements HttpInterceptor {
         function currentAccount() {
             // check if jwt token is in auth header
             const authHeader = headers.get('Authorization');
-            if (!authHeader?.startsWith('Bearer fake-jwt-token.')) return;
+            if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
 
-            const jwtToken = JSON.parse(atob(authHeader.split('.')[1]));
-            const tokenExpired = Date.now() >= jwtToken.exp * 1000;
-            if (tokenExpired) return;
+            // check if token is expired
+            const jwtToken = authHeader.substring(7);
+            const tokenParts = jwtToken.split('.');
+            if (tokenParts.length !== 3) return null;
+            
+            const payload = JSON.parse(atob(tokenParts[1]));
+            const expiry = new Date(payload.exp * 1000);
+            if (expiry <= new Date()) return null;
 
-            const account = accounts.find((x: any) => x.id === jwtToken.id);
-            return account;
+            // check if account still exists
+            const id = parseInt(payload.id);
+            return accounts.find(x => x.id === id);
         }
 
         function getRefreshToken() {
@@ -952,12 +371,13 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             return null;
         }
         
-        function generateJwtToken(account: any): string {
+        
+        function generateJwtToken(account) {
             // create token that expires in 15 minutes
             const tokenPayload = { 
-                exp: Math.round(new Date(Date.now() + 15 * 60 * 1000).getTime() / 1000), // expiration time in seconds
-                id: account.id // account ID
-            };
+                exp: Math.round(new Date(Date.now() + 15*60*1000).getTime() / 1000),
+                id: account.id
+            }
             return `fake-jwt-token.${btoa(JSON.stringify(tokenPayload))}`;
         }
 
@@ -965,14 +385,15 @@ export class FakeBackendInterceptor implements HttpInterceptor {
             // Generate a simple timestamp-based token
             const token = new Date().getTime().toString();
             
-            const expires = new Date(Date.now() + 7*24*60*60*1000).toISOString();
-            document.cookie = `fakeRefreshToken=${token}; expires=${expires}; path=/`; // 7 days expiration
+            // In a real app with a real backend, cookies would be set by the server
+            // For the fake backend, we'll just generate and return the token
+            // No cookies manipulation needed
             
             return token;
         }
 
         function newAccountId() {
-            return accounts.length ? Math.max(...accounts.map((x: any) => x.id)) + 1 : 1;
+            return accounts.length ? Math.max(...accounts.map(x => x.id)) + 1 : 1;
         }
     }
 }

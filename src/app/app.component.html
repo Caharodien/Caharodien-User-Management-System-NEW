@@ -1,43 +1,20 @@
-<div class="app-container" [ngClass]="{ 'bg-light': account }">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm" *ngIf="account">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="#">User Management System</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" 
-                           class="nav-link px-3">
-                            <i class="bi bi-house me-1"></i> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a routerLink="/profile" routerLinkActive="active" class="nav-link px-3">
-                            <i class="bi bi-person me-1"></i> Profile
-                        </a>
-                    </li>
-                    <li class="nav-item" *ngIf="account?.role === Role.Admin">
-                        <a routerLink="/admin" routerLinkActive="active" class="nav-link px-3">
-                            <i class="bi bi-gear me-1"></i> Admin
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a (click)="logout()" class="nav-link px-3" style="cursor: pointer;">
-                            <i class="bi bi-box-arrow-right me-1"></i> Logout
-                        </a>
-                    </li>
-                </ul>
-            </div>
+<div class="app-container" [ngClass]="{ 'bg-light': user }">
+    <!-- main nav -->
+    <nav class="navbar navbar-expand navbar-dark bg-dark" *ngIf="user">
+        <div class="navbar-nav">
+            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item nav-link">Home</a>
+            <a routerLink="/profile" routerLinkActive="active" class="nav-item nav-link">Profile</a>
+            <a *ngIf="user.role === Role.Admin" routerLink="/admin" routerLinkActive="active" class="nav-item nav-link">Admin</a>
+            <a (click)="logout()" class="nav-item nav-link">Logout</a>
         </div>
     </nav>
 
+    <!-- subnav router outlet -->
     <router-outlet name="subnav"></router-outlet>
     
+    <!-- global alert -->
     <alert></alert>
     
+    <!-- main router outlet -->
     <router-outlet></router-outlet>
 </div>

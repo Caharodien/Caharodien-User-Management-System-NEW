@@ -1,78 +1,61 @@
+// src/app/_services/account.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map, finalize } from 'rxjs/operators';
+
 import { environment } from '../../environments/environment';
-import { Account } from '../_models/account';
+import { User } from '../_models';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
-    private accountSubject: BehaviorSubject<Account | null>;
-    public account: Observable<Account | null>;
+    private userSubject: BehaviorSubject<User | null>;
+    public user: Observable<User | null>;
 
     constructor(
-        private http: HttpClient,
-        private router: Router
+        private router: Router,
+        private http: HttpClient
     ) {
-        this.accountSubject = new BehaviorSubject<Account | null>(null);
-        this.account = this.accountSubject.asObservable();
-        
-        const storedAccount = localStorage.getItem('account');
-        if (storedAccount) {
-            const account = JSON.parse(storedAccount);
-            this.accountSubject.next(account);
-            this.startRefreshTokenTimer();
-        }
+        this.userSubject = new BehaviorSubject<User | null>(null);
+        this.user = this.userSubject.asObservable();
     }
 
-    public get accountValue(): Account | null {
-        return this.accountSubject.value;
+    public get userValue(): User | null {
+        return this.userSubject.value;
     }
 
     login(email: string, password: string) {
-        return this.http.post<Account>(`${environment.apiUrl}/accounts/authenticate`, { email, password })
-            .pipe(map(account => {
-                localStorage.setItem('account', JSON.stringify(account));
-                this.accountSubject.next(account);
+        return this.http.post<any>(`${environment.apiUrl}/accounts/authenticate`, { email, password }, { withCredentials: true })
+            .pipe(map(user => {
+                this.userSubject.next(user);
                 this.startRefreshTokenTimer();
-                return account;
+                return user;
             }));
     }
 
     logout() {
+        this.http.post<any>(`${environment.apiUrl}/accounts/revoke-token`, {}, { withCredentials: true }).subscribe();
         this.stopRefreshTokenTimer();
-        
-        localStorage.removeItem('account');
-        this.accountSubject.next(null);
-        
+        this.userSubject.next(null);
         this.router.navigate(['/account/login']);
     }
 
-    register(account: Account) {
-        return this.http.post(`${environment.apiUrl}/accounts/register`, account);
-    }
-
     refreshToken() {
-        return this.http.post<Account>(`${environment.apiUrl}/accounts/refresh-token`, {}, { withCredentials: true })
-            .pipe(map(account => {
-                this.accountSubject.next(account);
-                localStorage.setItem('account', JSON.stringify(account));
+        return this.http.post<any>(`${environment.apiUrl}/accounts/refresh-token`, {}, { withCredentials: true })
+            .pipe(map((user) => {
+                this.userSubject.next(user);
                 this.startRefreshTokenTimer();
-                return account;
+                return user;
             }));
     }
 
-    getAll(): Observable<Account[]> {
-        return this.http.get<Account[]>(`${environment.apiUrl}/accounts`);
+    register(user: User) {
+        return this.http.post(`${environment.apiUrl}/accounts/register`, user);
     }
 
-    getById(id: string | number): Observable<Account> {
-        return this.http.get<Account>(`${environment.apiUrl}/accounts/${id}`);
-    }
-
-    create(params: any) {
-        return this.http.post<Account>(`${environment.apiUrl}/accounts`, params);
+    verifyEmail(token: string | null) {
+        return this.http.post(`${environment.apiUrl}/accounts/verify-email`, { token });
     }
 
     forgotPassword(email: string) {
@@ -82,60 +65,60 @@ export class AccountService {
     resetPassword(token: string, password: string, confirmPassword: string) {
         return this.http.post(`${environment.apiUrl}/accounts/reset-password`, { token, password, confirmPassword });
     }
-
-    verifyEmail(token: string) {
-        return this.http.post(`${environment.apiUrl}/accounts/verify-email`, { token });
-    }
     
-    deactivateAccount(id: string | number) {
-        return this.http.delete<void>(`${environment.apiUrl}/accounts/${id}`)
+    getAll() {
+        return this.http.get<User[]>(`${environment.apiUrl}/accounts`);
+    }
+
+    getById(id: string) {
+        return this.http.get<User>(`${environment.apiUrl}/accounts/${id}`);
+    }
+
+    create(params: any) {
+        return this.http.post(`${environment.apiUrl}/accounts`, params);
+    }
+
+    update(id: string, params: any) {
+        return this.http.put(`${environment.apiUrl}/accounts/${id}`, params)
+            .pipe(map((user: any) => {
+                // update stored user if the logged in user updated their own record
+                if (user.id === this.userValue?.id) {
+                    // update local storage
+                    const newUser = { ...this.userValue, ...user };
+                    this.userSubject.next(newUser);
+                }
+                return user;
+            }));
+    }
+
+    delete(id: string) {
+        return this.http.delete(`${environment.apiUrl}/accounts/${id}`)
             .pipe(finalize(() => {
-                if (id === this.accountValue?.id) {
+                // auto logout if the logged in user deleted their own record
+                if (id === this.userValue?.id) {
                     this.logout();
                 }
             }));
     }
-    
-    
-    update(id: string | number, params: any) {
-        return this.http.put<Account>(`${environment.apiUrl}/accounts/${id}`, params)
-            .pipe(map((account: Account) => {
-                if (account.id === this.accountValue?.id) {
-                    const updatedAccount = { ...this.accountValue, ...account };
-                    this.accountSubject.next(updatedAccount);
-                    localStorage.setItem('account', JSON.stringify(updatedAccount));
-                }
-                return account;
-            }));
-    }
 
-    delete(id: string | number) {
-        return this.http.delete<void>(`${environment.apiUrl}/accounts/${id}`)
-            .pipe(finalize(() => {
-                if (id === this.accountValue?.id) {
-                    this.logout();
-                }
-            }));
-    }
-
+    // helper methods
     private refreshTokenTimeout?: any;
 
     private startRefreshTokenTimer() {
-        if (!this.accountValue?.jwtToken) return;
-        
-        try {
-            const jwtToken = JSON.parse(atob(this.accountValue.jwtToken.split('.')[1]));
-            const expires = new Date(jwtToken.exp * 1000);
-            const timeout = expires.getTime() - Date.now() - (60 * 1000);
-            this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
-        } catch (error) {
-            console.error('Error starting refresh token timer:', error);
-        }
+        // parse json object from base64 encoded jwt token
+        const jwtToken = JSON.parse(atob(this.userValue!.jwtToken!.split('.')[1]));
+
+        // set a timeout to refresh the token a minute before it expires
+        const expires = new Date(jwtToken.exp * 1000);
+        const timeout = expires.getTime() - Date.now() - (60 * 1000);
+        this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
     }
 
     private stopRefreshTokenTimer() {
-        if (this.refreshTokenTimeout) {
-            clearTimeout(this.refreshTokenTimeout);
-        }
+        clearTimeout(this.refreshTokenTimeout);
     }
 }
+
+// Update src/app/_services/index.ts to include the AccountService
+export * from './alert.service';
+export * from './account.service';

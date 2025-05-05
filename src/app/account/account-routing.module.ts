@@ -1,12 +1,13 @@
+// src/app/account/account-routing.module.ts
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { LayoutComponent } from './layout.component';
-import { LoginComponent } from './login.component';
-import { RegisterComponent } from './register.component';
-import { VerifyEmailComponent } from './verify-email.component';
+import { LayoutComponent } from '../account/layout.component';
+import { LoginComponent } from '../account/login.component';
+import { RegisterComponent } from '../account/register.component';
+import { VerifyEmailComponent } from '../account/verify-email.component';
+import { ResetPasswordComponent } from '../account/reset-password.component';
 import { ForgotPasswordComponent } from './forgot-password.component';
-import { ResetPasswordComponent } from './reset-password.component';
 
 const routes: Routes = [
     {
@@ -25,4 +26,4 @@ const routes: Routes = [
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule]
 })
-export class AccountRoutingModule {}
+export class AccountRoutingModule { }

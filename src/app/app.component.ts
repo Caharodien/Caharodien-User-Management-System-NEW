@@ -1,47 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+// src/app/app.component.ts
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router, NavigationEnd } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { RouterModule } from '@angular/router';
+import { AccountService } from './_services';
+import { User, Role } from './_models';
 import { AlertComponent } from './components/alert.component';
-import { AccountService } from './_services/account.service';
-import { Role } from './_models/role';
-import { filter } from 'rxjs/operators';
 
 @Component({
-    selector: 'app',
-    templateUrl: 'app.component.html',
-    standalone: true,
-    imports: [CommonModule, RouterModule, HttpClientModule, AlertComponent]
+  selector: 'app-root',
+  templateUrl: 'app.component.html',
+  standalone: true,
+  imports: [
+    CommonModule,  // For ngClass and other directives
+    RouterModule,  // For router-outlet
+    AlertComponent  // For <alert> component
+  ]
 })
-export class AppComponent implements OnInit {
-    account: any;
-    Role = Role;
+export class AppComponent {
+  Role = Role;
+  user?: User | null;
 
-    constructor(
-        private accountService: AccountService,
-        private router: Router
-    ) {
-        this.accountService.account.subscribe(x => {
-            console.log('Account updated:', x);
-            this.account = x;
-            if (x) {
-                if (this.router.url.includes('/account/login')) {
-                    this.router.navigate(['home']);
-                }
-            }
-        });
-    }
+  constructor(private accountService: AccountService) {
+    this.accountService.user.subscribe(x => this.user = x);
+  }
 
-    ngOnInit() {
-        this.router.events.pipe(
-            filter(event => event instanceof NavigationEnd)
-        ).subscribe((event: NavigationEnd) => {
-            console.log('Navigation completed:', event.url);
-        });
-
-    }
-
-    logout() {
-        this.accountService.logout();
-    }
+  logout() {
+    this.accountService.logout();
+  }
 }
