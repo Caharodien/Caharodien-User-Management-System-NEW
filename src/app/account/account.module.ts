@@ -1,4 +1,3 @@
-// src/app/account/account.module.ts
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -15,20 +14,15 @@ import { ResetPasswordComponent } from './reset-password.component';
     imports: [
         CommonModule,
         ReactiveFormsModule,
-        AccountRoutingModule,
-        // Import standalone components
+        AccountRoutingModule
+    ],
+    declarations: [
         LayoutComponent,
         LoginComponent,
         RegisterComponent,
         VerifyEmailComponent,
-        ResetPasswordComponent,
-        // Add ForgotPasswordComponent only if it's also standalone
-        // ForgotPasswordComponent
-    ],
-    declarations: [
-        // Only non-standalone components should be here
-        // If ForgotPasswordComponent is not standalone, it should be here
-        ForgotPasswordComponent
+        ForgotPasswordComponent,
+        ResetPasswordComponent
     ]
 })
 export class AccountModule { }
