@@ -15,14 +15,18 @@
               "main": "src/main.ts",
               "polyfills": "src/polyfills.ts",
               "tsConfig": "tsconfig.app.json",
-              "assets": [
+             "assets": [
                 "src/favicon.ico",
-                "src/assets"
-              ],
+                "src/assets",
+                  {
+                    "glob": "_redirects",
+                    "input": "src",
+                    "output": "/"
+                  }
+                ],
               "styles": [
                 "node_modules/bootstrap/dist/css/bootstrap.min.css",
-                "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-                "src/styles.scss"
+                "node_modules/bootstrap-icons/font/bootstrap-icons.css"
               ],
               "scripts": []
             },

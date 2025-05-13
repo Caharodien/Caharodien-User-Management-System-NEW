@@ -59,8 +59,10 @@ async function authenticate({ email, password, ipAddress }) {
         throw 'Your account has been deactivated. Please contact an administrator.';
     }
     
-    const verificationStatus = !!(account.verified || account.passwordReset);
-    console.log(`- Verification check result: ${verificationStatus}`);
+    if (account.verified || account.passwordReset) {
+        console.log('Manually verifying account based on verified/passwordReset fields');
+        account.isVerified = true;
+    }
     
     if (!account.isVerified) {
         console.log(`Account ${email} is not verified`);
@@ -221,12 +223,10 @@ async function update(id, params) {
 async function _delete(id) {
     const account = await getAccount(id);
     
-    // Prevent deletion for admin accounts
     if (account.role === Role.Admin) {
         throw 'Admin accounts cannot be deleted';
     }
     
-    // Perform hard delete from database
     await account.destroy();
     
     return { message: 'Account deleted successfully' };
@@ -272,20 +272,36 @@ function basicDetails(account) {
 
 async function sendVerificationEmail(account, origin) {
     let message;
-    // Use backend URL for verification
-    const backendUrl = 'http://localhost:4000';
+
+    if (!account || !account.email) {
+        console.error('Cannot send verification email: account or email is missing');
+        throw new Error('No recipients defined');
+    }
+
+    const backendUrl = process.env.NODE_ENV === 'production'
+        ? 'https://user-management-sancija.onrender.com' 
+        : 'http://localhost:4000';
+    
     const verifyUrl = `${backendUrl}/accounts/verify-email?token=${account.verificationToken}&origin=${encodeURIComponent(origin)}`;
     
     message = `<p>Please click the below link to verify your email address:</p>
                <p><a href="${verifyUrl}">${verifyUrl}</a></p>`;
+     
+    console.log(`Sending verification email to: ${account.email}`);
     
-    await sendEmail({
-        to: account.email,
-        subject: 'Sign-up Verification API - Verify Email',
-        html: `<h4>Verify Email</h4>
-               <p>Thanks for registering!</p>
-               ${message}`
-    });
+    try {
+        await sendEmail({
+            to: account.email,
+            subject: 'Sign-up Verification API - Verify Email',
+            html: `<h4>Verify Email</h4>
+                   <p>Thanks for registering!</p>
+                   ${message}`
+        });
+        console.log(`Verification email sent successfully to ${account.email}`);
+    } catch (error) {
+        console.error(`Failed to send verification email to ${account.email}:`, error);
+        throw error;
+    }
 }
 
 async function sendAlreadyRegisteredEmail(email, origin) {
