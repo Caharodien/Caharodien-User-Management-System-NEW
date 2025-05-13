@@ -1,5 +1,5 @@
 export const environment = {
     production: false,
-    apiUrl: 'http://localhost:4000'
+    apiUrl: 'https://caharodien-user-management-system-new.onrender.com'
   };
   
