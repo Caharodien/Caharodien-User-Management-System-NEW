@@ -1,37 +1,20 @@
 {
-    "database": {
-        "host": "153.92.15.31",
-        "port": 3306,
-<<<<<<< HEAD
-        "user": "u875409848_amama",
-        "password": "m>G>4T42",
-        "database": "u875409848_amama"
-    },
-        "secret": "TcxtoIgRRbUqqgW174x1zAA==",
-        "emailFrom": "usermanagementsystem.amama.1wellplayed@gmail.com",
-=======
-        "user": "roots",
-        "password": "Sancija-11",
-        "database": "node-mysql-signup-verification-api"
+        "database": {
+            "host": "153.92.15.31",
+            "port": 3306,
+            "user": "u875409848_auman",
+            "password": "9T2Z5$3UKkgSYzE",
+            "database": "u875409848_auman"
         },
-        "secret": "TcxtoIgRRbUqqgW174x1zAA==",
-        "emailFrom": "info@node-mysql-signup-verification-api.com",
->>>>>>> 384b3717032c7c1e722fda52b43beb7d3ade4311
-        "smtpOptions": {  
-        "host": "smtp.gmail.com",
-        "port": 587,
-        "auth": {
-<<<<<<< HEAD
-        "user": "amama.1wellplayed@gmail.com",
-        "pass": "imam pfqr cgnv edmm"
+            "secret": "TcxtoIgRRbUqqgW174x1zAA==",
+            "emailFrom": "usermanagementsystem.amama.1wellplayed@gmail.com",
+            "smtpOptions": {  
+            "host": "smtp.gmail.com",
+            "port": 587,
+            "auth": {
+            "user": "amama.1wellplayed@gmail.com",
+            "pass": "imam pfqr cgnv edmm"
+            }
+            }
+    
         }
-        }
-
-    }
-=======
-        "user": "ladarius66@ethereal.email",
-        "pass": "HaCUhbSy1XEmTpTExr"
-        }
-        }
-    }
->>>>>>> 384b3717032c7c1e722fda52b43beb7d3ade4311
