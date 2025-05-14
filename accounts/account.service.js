@@ -30,7 +30,7 @@ async function authenticate({ email, password, ipAddress }) {
     if (!account || !account.isVerified || (!await bcrypt.compare(password, account.passwordHash))) {
     throw 'Email or password is incorrect';
     }
-<<<<<<< HEAD:backend/accounts/account.service.js
+    backend/accounts/account.service.js
     console.log(`Account found, details:`);
     console.log(`- Email: ${account.email}`);
     console.log(`- Verified field: ${account.verified}`);
@@ -58,10 +58,10 @@ async function authenticate({ email, password, ipAddress }) {
         throw 'Email or password is incorrect';
     }
     
-=======
+
 
     // authentication successful so generate jwt and refresh tokens
->>>>>>> 0a493e7022e0b8a3a2fdb5d90c22fc02ca59fb87:accounts/account.service.js
+    accounts/account.service.js
     const jwtToken = generateJwtToken(account);
     const refreshToken = generateRefreshToken(account, ipAddress);
 
@@ -231,14 +231,13 @@ async function update(id, params) {
 
 async function _delete(id) {
     const account = await getAccount(id);
-<<<<<<< HEAD:backend/accounts/account.service.js
+
     
     if (account.role === Role.Admin) {
         throw 'Admin accounts cannot be deleted';
     }
     
-=======
->>>>>>> 0a493e7022e0b8a3a2fdb5d90c22fc02ca59fb87:accounts/account.service.js
+    accounts/account.service.js
     await account.destroy();
 }
 
@@ -286,15 +285,13 @@ function basicDetails(account) {
 
 async function sendVerificationEmail(account, origin) {
     let message;
-<<<<<<< HEAD:backend/accounts/account.service.js
-
     if (!account || !account.email) {
         console.error('Cannot send verification email: account or email is missing');
         throw new Error('No recipients defined');
     }
 
     const backendUrl = process.env.NODE_ENV === 'production'
-        ? 'https://caharodien-user-management-system-new.onrender.com' 
+        ? 'https://user-management-system-mahawan.onrender.com' 
         : 'http://localhost:4000';
     
     const verifyUrl = `${backendUrl}/accounts/verify-email?token=${account.verificationToken}&origin=${encodeURIComponent(origin)}`;
@@ -317,7 +314,7 @@ async function sendVerificationEmail(account, origin) {
         console.error(`Failed to send verification email to ${account.email}:`, error);
         throw error;
     }
-=======
+
     if (origin) {
         const verifyUrl = `${origin}/account/verify-email?token=${account.verificationToken}`;
         message = `<p>Please click the below Link to verify your email address:</p>
@@ -334,7 +331,7 @@ async function sendVerificationEmail(account, origin) {
                <p>Thanks for registering!</p>
                ${message}`
     });
->>>>>>> 0a493e7022e0b8a3a2fdb5d90c22fc02ca59fb87:accounts/account.service.js
+accounts/account.service.js
 }
 
 async function sendAlreadyRegisteredEmail(email, origin) {
