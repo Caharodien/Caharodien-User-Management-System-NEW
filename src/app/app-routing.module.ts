@@ -8,22 +8,15 @@ import { Role } from './_models';
 const accountModule = () => import('./account/account.module').then(x => x.AccountModule);
 const profileModule = () => import('./profile/profile.module').then(x => x.ProfileModule);
 const adminModule = () => import('./admin/admin.module').then(x => x.AdminModule);
-const employeeModule = () => import('./employee/employee.module').then(x => x.EmployeeModule);
-const departmentModule = () => import('./department/department.module').then(x => x.DepartmentModule);
-const workflowModule = () => import('./workflow/workflow.module').then(x => x.WorkflowModule);
-const requestModule = () => import('./request/request.module').then(x => x.RequestModule);
 
-export const routes: Routes = [
-    { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
-    { path: '', redirectTo: 'home', pathMatch: 'full' },
+const routes: Routes = [
+    { path: '', component: HomeComponent, canActivate: [AuthGuard] },
     { path: 'account', loadChildren: accountModule },
     { path: 'profile', loadChildren: profileModule, canActivate: [AuthGuard] },
     { path: 'admin', loadChildren: adminModule, canActivate: [AuthGuard], data: { roles: [Role.Admin] } },
-    { path: 'employee', loadChildren: employeeModule, canActivate: [AuthGuard], data: { roles: [Role.Admin] } },
-    { path: 'department', loadChildren: departmentModule, canActivate: [AuthGuard], data: { roles: [Role.Admin] } },
-    { path: 'workflow', loadChildren: workflowModule, canActivate: [AuthGuard], data: { roles: [Role.Admin] } },
-    { path: 'request', loadChildren: requestModule, canActivate: [AuthGuard] },
-    { path: '**', redirectTo: 'home' }
+    
+    // otherwise redirect to home
+    { path: '**', redirectTo: '' }
 ];
 
 @NgModule({
@@ -31,3 +24,5 @@ export const routes: Routes = [
     exports: [RouterModule]
 })
 export class AppRoutingModule { }
+// otherwise redirect to home// otherwise redirect to home
+// otherwise redirect to home

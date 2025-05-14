@@ -25,8 +25,13 @@
                   }
                 ],
               "styles": [
+<<<<<<< HEAD
                 "node_modules/bootstrap/dist/css/bootstrap.min.css",
                 "node_modules/bootstrap-icons/font/bootstrap-icons.css"
+=======
+                "src/styles.css",
+                "node_modules/bootstrap/dist/css/bootstrap.min.css"
+>>>>>>> 384b3717032c7c1e722fda52b43beb7d3ade4311
               ],
               "scripts": []
             },

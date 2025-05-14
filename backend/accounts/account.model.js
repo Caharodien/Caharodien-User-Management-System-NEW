@@ -11,7 +11,6 @@ function model(sequelize) {
         lastName: { type: DataTypes.STRING, allowNull: false },
         acceptTerms: { type: DataTypes.BOOLEAN },
         role: { type: DataTypes.STRING, allowNull: false },
-        isActive: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
         verificationToken: { type: DataTypes.STRING },
         verified: { type: DataTypes.DATE },
         resetToken: { type: DataTypes.STRING },
@@ -21,20 +20,18 @@ function model(sequelize) {
         updated: { type: DataTypes.DATE },
         isVerified: {
             type: DataTypes.VIRTUAL,
-            get() { 
-                const isVerified = !!(this.verified || this.passwordReset);
-                console.log(`isVerified calculation for ${this.email}: verified=${this.verified}, passwordReset=${this.passwordReset}, result=${isVerified}`);
-                return isVerified;
-            }
+            get() { return !!(this.verified || this.passwordReset); }
         }
     };
-    
     const options = {
+        // disable default timestamp fields (createdAt and updatedAt)
         timestamps: false,
         defaultScope: {
+        // exclude password hash by default
         attributes: { exclude: ['passwordHash'] }
         },
         scopes: {
+        // include hash with this scope
         withHash: { attributes: {}, } 
         }
     };

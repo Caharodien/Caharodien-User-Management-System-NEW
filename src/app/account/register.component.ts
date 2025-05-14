@@ -1,21 +1,19 @@
+// src/app/account/register.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { first } from 'rxjs/operators';
 import { AlertService } from '../_services';
 import { AccountService } from '../_services/account.service';
 
-@Component({
+@Component({ 
     templateUrl: 'register.component.html',
     standalone: true,
-    imports:
-    [
+    imports: [
         CommonModule,
-        ReactiveFormsModule,
-        RouterModule        
-        ] 
-        
+        ReactiveFormsModule
+    ]
 })
 export class RegisterComponent implements OnInit {
     form!: FormGroup;
@@ -28,7 +26,7 @@ export class RegisterComponent implements OnInit {
         private router: Router,
         private accountService: AccountService,
         private alertService: AlertService
-    ) {}
+    ) { }
 
     ngOnInit() {
         this.form = this.formBuilder.group({
@@ -44,24 +42,29 @@ export class RegisterComponent implements OnInit {
         });
     }
 
+    // Custom validator to check if passwords match
     passwordMatchValidator(formGroup: FormGroup) {
         const password = formGroup.get('password')?.value;
         const confirmPassword = formGroup.get('confirmPassword')?.value;
         if (password !== confirmPassword) {
             formGroup.get('confirmPassword')?.setErrors({ passwordMismatch: true });
-            return { passwordMismatch: true };
+            return { passwordMismatch: true }; // Return an error object
         }
+        
+        // Always return null for valid cases
         return null;
     }
 
-    get f() {
-        return this.form.controls;
-    }
+    // convenience getter for easy access to form fields
+    get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
-        this.alertService.clear();
 
+        // reset alerts on submit
+        this.alertService.clear();
+        
+        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }

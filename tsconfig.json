@@ -5,7 +5,7 @@
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,  // Change this from true to false
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
@@ -14,10 +14,10 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2022", 
-    "module": "es2022",
+    "target": "es2017",
+    "module": "es2020",
     "lib": [
-      "es2022",
+      "es2018",
       "dom"
     ],
     "paths": {
@@ -30,18 +30,5 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  },
-  "files": [
-    "src/main.ts"
-  ],
-  "include": [
-    "src/**/*.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts",
-    "src/environments/environment.prod.ts",
-    "src/app/components/index.ts",
-    "src/app/home/index.ts"
-  ]
+  }
 }

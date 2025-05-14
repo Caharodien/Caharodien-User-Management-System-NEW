@@ -1,3 +1,4 @@
+// src/app/account/reset-password.component.ts
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -10,7 +11,10 @@ import { MustMatch } from '../_helpers';
 @Component({ 
     templateUrl: 'reset-password.component.html',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule]
+    imports: [
+        CommonModule,
+        ReactiveFormsModule
+    ]
 })
 export class ResetPasswordComponent implements OnInit {
     form!: FormGroup;
@@ -28,7 +32,9 @@ export class ResetPasswordComponent implements OnInit {
 
     ngOnInit() {
         this.token = this.route.snapshot.queryParams['token'];
-            if (!this.token) {
+        
+        // redirect to home if no token found
+        if (!this.token) {
             this.router.navigate(['/account/login']);
             return;
         }
@@ -40,17 +46,25 @@ export class ResetPasswordComponent implements OnInit {
             validator: MustMatch('password', 'confirmPassword')
         });
     }
+
+    // convenience getter for easy access to form fields
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
+
+        // reset alerts on submit
         this.alertService.clear();
+
+        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }
 
         this.loading = true;
-            this.accountService.resetPassword(
+        
+        // Updated to match your AccountService method signature
+        this.accountService.resetPassword(
             this.token!, 
             this.f.password.value, 
             this.f.confirmPassword.value
