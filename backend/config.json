@@ -9,7 +9,7 @@
         "secret": "TcxtoIgRRbUqqgW174x1zAA==",
         "emailFrom": "usermanagementsystem.amama.1wellplayed@gmail.com",
         "smtpOptions": {  
-        "host": "smtp.ethereal.email",
+        "host": "smtp.gmail.com",
         "port": 587,
         "auth": {
         "user": "amama.1wellplayed@gmail.com",
