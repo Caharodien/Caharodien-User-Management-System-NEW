@@ -26,12 +26,15 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "bootstrap": "^5.3.5",
-    "bootstrap-icons": "^1.12.1",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
+<<<<<<< HEAD
     "debug": "^4.4.0",
     "dotenv": "^16.0.3",
     "express": "^4.21.2",
+=======
+    "express": "^4.17.1",
+>>>>>>> 0a493e7022e0b8a3a2fdb5d90c22fc02ca59fb87
     "express-jwt": "^6.0.0",
     "joi": "^17.2.1",
     "jsonwebtoken": "^8.5.1",
