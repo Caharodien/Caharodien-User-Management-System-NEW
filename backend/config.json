@@ -2,9 +2,9 @@
     "database": {
         "host": "153.92.15.31",
         "port": 3306,
-        "user": "u875409848_test",
+        "user": "u875409848_mmahinay",
         "password": "9T2Z5$3UKkgSYzE",
-        "database": "u875409848_test"
+        "database": "u875409848_mmahinay"
     },
         "secret": "TcxtoIgRRbUqqgW174x1zAA==",
         "emailFrom": "usermanagementsystem.amama.1wellplayed@gmail.com",
