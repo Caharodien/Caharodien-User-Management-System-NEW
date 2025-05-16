@@ -5,8 +5,8 @@ import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 
-import { EmployeeService, DepartmentService, AlertService } from '@app/_services';
-import { Department } from '@app/_models';
+import { EmployeeService, DepartmentService, AlertService, AccountService } from '@app/_services';
+import { Department, Account } from '@app/_models';
 
 @Component({ 
     standalone: true,
@@ -20,6 +20,7 @@ export class AddEditComponent implements OnInit {
     loading = false;
     submitted = false;
     departments: Department[] = [];
+    accounts: Account[] = []; 
 
     constructor(
         private formBuilder: FormBuilder,
@@ -27,6 +28,7 @@ export class AddEditComponent implements OnInit {
         private router: Router,
         private employeeService: EmployeeService,
         private departmentService: DepartmentService,
+        private accountService: AccountService, 
         private alertService: AlertService
     ) {}
 
@@ -34,34 +36,35 @@ export class AddEditComponent implements OnInit {
         this.id = this.route.snapshot.params['id'];
         this.isAddMode = !this.id;
         
-        // Load departments
         this.loadDepartments();
+        this.loadAccounts(); // Always load accounts for both add and edit modes
         
         this.form = this.formBuilder.group({
             employeeId: ['', [Validators.required, Validators.maxLength(20)]],
-            firstName: ['', [Validators.required, Validators.maxLength(50)]],
-            lastName: ['', [Validators.required, Validators.maxLength(50)]],
-            email: ['', [Validators.email, Validators.maxLength(100)]],
+            accountId: ['', this.isAddMode ? Validators.required : Validators.nullValidator],
             position: ['', [Validators.required, Validators.maxLength(100)]],
-            departmentId: ['', Validators.required],
+            departmentId: ['', Validators.required],   
             hireDate: ['', Validators.required],
             status: ['Active', Validators.required]
-        });
-
+        }); 
+        
         if (!this.isAddMode) {
             this.loading = true;
             this.employeeService.getById(this.id)
                 .pipe(first())
                 .subscribe(
                     employee => {
-                        // Format date as YYYY-MM-DD for input type="date"
                         const hireDate = employee.hireDate 
                             ? new Date(employee.hireDate).toISOString().split('T')[0]
                             : '';
-                            
+                        
                         this.form.patchValue({
-                            ...employee,
-                            hireDate
+                            employeeId: employee.employeeId,
+                            accountId: employee.account?.id || '',
+                            position: employee.position,
+                            departmentId: employee.departmentId,
+                            hireDate: hireDate,
+                            status: employee.status
                         });
                         this.loading = false;
                     },
@@ -73,7 +76,7 @@ export class AddEditComponent implements OnInit {
                 );
         }
     }
-
+    
     private loadDepartments() {
         this.departmentService.getAll()
             .pipe(first())
@@ -83,30 +86,53 @@ export class AddEditComponent implements OnInit {
             );
     }
     
-    // convenience getter for easy access to form fields
+    private loadAccounts() {
+        this.accountService.getAll()
+            .pipe(first())
+            .subscribe(
+                accounts => {
+                    this.accounts = accounts.sort((a, b) => {
+                        if (a.isVerified && !b.isVerified) return -1;
+                        if (!a.isVerified && b.isVerified) return 1;
+                        
+                        if (a.role === 'Admin' && b.role !== 'Admin') return -1;
+                        if (a.role !== 'Admin' && b.role === 'Admin') return 1;
+                        
+                        return (a.firstName + ' ' + a.lastName).localeCompare(b.firstName + ' ' + b.lastName);
+                    });
+                    
+                    console.log('Loaded accounts:', this.accounts);
+                },
+                error => this.alertService.error('Error loading accounts: ' + error)
+            );
+    }
+    
     get f() { return this.form.controls; }
 
     onSubmit() {
         this.submitted = true;
-
-        // reset alerts on submit
         this.alertService.clear();
 
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }
 
+        const formData: any = { ...this.form.value };
+        
+        if (formData.status !== 'Active' && formData.status !== 'Inactive') {
+            formData.status = 'Active';
+        }
+
         this.loading = true;
         if (this.isAddMode) {
-            this.createEmployee();
+            this.createEmployee(formData);
         } else {
-            this.updateEmployee();
+            this.updateEmployee(formData);
         }
     }
-
-    private createEmployee() {
-        this.employeeService.create(this.form.value)
+    
+    private createEmployee(formData: any) {
+        this.employeeService.create(formData)
             .pipe(first())
             .subscribe(
                 () => {
@@ -120,8 +146,8 @@ export class AddEditComponent implements OnInit {
             );
     }
 
-    private updateEmployee() {
-        this.employeeService.update(this.id, this.form.value)
+    private updateEmployee(formData: any) {
+        this.employeeService.update(this.id, formData)
             .pipe(first())
             .subscribe(
                 () => {

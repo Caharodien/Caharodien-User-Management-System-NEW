@@ -27,19 +27,28 @@ export class ListComponent implements OnInit {
     }
 
     private loadEmployees() {
-        this.employeeService.getAll()
-            .pipe(first())
-            .subscribe(
-                employees => {
-                    this.employees = employees;
-                    this.loading = false;
-                },
-                error => {
-                    this.alertService.error('Error loading employees: ' + error);
-                    this.loading = false;
-                }
-            );
-    }
+    this.employeeService.getAll()
+        .pipe(first())
+        .subscribe(
+            employees => {
+                // Process employees to ensure name properties
+                this.employees = employees.map(employee => {
+                    // If account data exists but direct name properties don't
+                    if (employee.account && (!employee.firstName || !employee.lastName)) {
+                        employee.firstName = employee.account.firstName;
+                        employee.lastName = employee.account.lastName;
+                        employee.email = employee.account.email || employee.email;
+                    }
+                    return employee;
+                });
+                this.loading = false;
+            },
+            error => {
+                this.alertService.error('Error loading employees: ' + error);
+                this.loading = false;
+            }
+        );
+}
 
     deleteEmployee(id: number) {
         if (confirm('Are you sure you want to delete this employee? This action cannot be undone.')) {

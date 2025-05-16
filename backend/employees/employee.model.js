@@ -26,7 +26,7 @@ function model(sequelize) {
             allowNull: false,
             defaultValue: 'Active',
             validate: {
-                isIn: [['Active', 'On Leave', 'Terminated']]
+                isIn: [['Active','Inactive']]
             }
         },
         created: { 

@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms'; 
 import { first } from 'rxjs/operators';
-
+import { RouterModule } from '@angular/router';
 import { EmployeeService, DepartmentService, AlertService } from '@app/_services';
 import { Employee, Department } from '@app/_models';
 
 @Component({ 
     standalone: true,  
-    imports: [CommonModule, ReactiveFormsModule], 
+    imports: [CommonModule, ReactiveFormsModule, RouterModule], 
     templateUrl: 'transfer.component.html' 
 })
 export class TransferComponent implements OnInit {
@@ -40,7 +40,12 @@ export class TransferComponent implements OnInit {
         this.loadEmployeeDetails();
         this.loadDepartments();
     }
-
+    
+    // Add this method for the back button
+    goBackToEmployees() {
+        this.router.navigate(['/employee']);
+    }
+    
     private loadEmployeeDetails() {
         this.employeeService.getById(this.id)
             .pipe(first())
@@ -56,7 +61,8 @@ export class TransferComponent implements OnInit {
                 }
             );
     }
-     private loadDepartments() {
+    
+    private loadDepartments() {
         this.departmentService.getAll()
             .pipe(first())
             .subscribe(
@@ -70,10 +76,8 @@ export class TransferComponent implements OnInit {
     onSubmit() {
         this.submitted = true;
 
-        // reset alerts on submit
         this.alertService.clear();
 
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }
@@ -82,7 +86,7 @@ export class TransferComponent implements OnInit {
             this.alertService.error('Employee is already in this department');
             return;
         }
-
+        
         this.submitting = true;
         this.employeeService.update(this.id, { departmentId: this.form.value.departmentId })
             .pipe(first())

@@ -36,6 +36,10 @@ export class DetailsComponent implements OnInit {
         this.loadEmployeeDetails();
     }
 
+    goBackToEmployees() {
+        this.router.navigate(['/employee']);
+    }
+
     private loadEmployeeDetails() {
         this.employeeService.getById(this.id)
             .pipe(first())

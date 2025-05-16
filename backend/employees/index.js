@@ -4,17 +4,31 @@ const db = require('../_helpers/db');
 const authorize = require('../_middleware/authorize');
 const Role = require('../_helpers/role');
 
-// Routes
 router.post('/', authorize(Role.Admin), create);
 router.get('/', authorize(), getAll);
 router.get('/:id', authorize(), getById);
 router.put('/:id', authorize(Role.Admin), update);
 router.delete('/:id', authorize(Role.Admin), _delete);
 router.post('/:id/transfer', authorize(Role.Admin), transfer);
+
 async function create(req, res, next) {
     try {
-        const employee = await db.Employee.create(req.body);
-        res.status(201).json(employee);
+        const { accountId, ...employeeData } = req.body;
+        
+        const employee = await db.Employee.create(employeeData);
+        
+        if (accountId) {
+            const account = await db.Account.findByPk(accountId);
+            if (!account) throw new Error('Account not found');
+            
+            await employee.setAccount(account);
+        }
+        
+        const createdEmployee = await db.Employee.findByPk(employee.id, {
+            include: [{ model: db.Account }, { model: db.Department }]
+        });
+        
+        res.status(201).json(createdEmployee);
     } catch (err) { 
         next(err); 
     }

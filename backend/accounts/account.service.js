@@ -41,52 +41,87 @@ async function toggleActivation(id) {
 }
 
 async function authenticate({ email, password, ipAddress }) {
-    const account = await db.Account.scope('withHash').findOne({ where: { email } });
-    console.log(`Login attempt for ${email}`);
-    
-    if (!account) {
-        console.log(`Account not found for ${email}`);
-        throw 'Email or password is incorrect';
-    }
-    console.log(`Account found, details:`);
-    console.log(`- Email: ${account.email}`);
-    console.log(`- Verified field: ${account.verified}`);
-    console.log(`- PasswordReset field: ${account.passwordReset}`);
-    console.log(`- isVerified computed value: ${account.isVerified}`);
-    
-    if (account.role !== Role.Admin && account.isActive === false) {
-        console.log(`Account ${email} is deactivated`);
-        throw 'Your account has been deactivated. Please contact an administrator.';
-    }
-    
-    if (account.verified || account.passwordReset) {
-        console.log('Manually verifying account based on verified/passwordReset fields');
-        account.isVerified = true;
-    }
-    
-    if (!account.isVerified) {
-        console.log(`Account ${email} is not verified`);
-        throw 'Please verify your email before logging in';
-    }
-    
-    const passwordValid = await bcrypt.compare(password, account.passwordHash);
-    if (!passwordValid) {
-        console.log(`Invalid password for ${email}`);
-        throw 'Email or password is incorrect';
-    }
-    
-    const jwtToken = generateJwtToken(account);
-    const refreshToken = generateRefreshToken(account, ipAddress);
+    try {
+        console.log(`Login attempt for ${email}`);
+        
+        let account;
+        try {
+            account = await db.Account.scope('withHash').findOne({ where: { email } });
+        } catch (error) {
+            console.error('Error querying account:', error.message);
+            throw 'Database error. Please try again later.';
+        }
+        
+        if (!account) {
+            console.log(`Account not found for ${email}`);
+            throw 'Email or password is incorrect';
+        }
+        
+        console.log(`Account found, details:`);
+        console.log(`- Email: ${account.email ?? 'undefined'}`);
+        console.log(`- Verified field: ${account.verified ?? 'undefined'}`);
+        console.log(`- PasswordReset field: ${account.passwordReset ?? 'undefined'}`);
+        
+        if (db.isConnected === false) {
+            console.log('Using mock database - authentication disabled');
+            throw 'Authentication service is temporarily unavailable. Please try again later.';
+        }
+        
+        const isVerified = !!(account.verified || account.passwordReset);
+        console.log(`- isVerified computed value: ${isVerified}`);
+        
+        if ((account.role !== Role.Admin) && (account.isActive === false)) {
+            console.log(`Account ${email} is deactivated`);
+            throw 'Your account has been deactivated. Please contact an administrator.';
+        }
+        
+        if (!isVerified) {
+            console.log(`Account ${email} is not verified`);
+            throw 'Please verify your email before logging in';
+        }
+        
+        if (!account.passwordHash) {
+            console.log(`No password hash available for ${email}`);
+            throw 'Authentication error. Please try again later.';
+        }
+        
+        try {
+            const passwordValid = await bcrypt.compare(password, account.passwordHash);
+            if (!passwordValid) {
+                console.log(`Invalid password for ${email}`);
+                throw 'Email or password is incorrect';
+            }
+        } catch (error) {
+            console.error('Password comparison error:', error.message);
+            throw 'Authentication error. Please try again later.';
+        }
+        
+        let jwtToken, refreshToken;
+        try {
+            jwtToken = generateJwtToken(account);
+            refreshToken = generateRefreshToken(account, ipAddress);
+            await refreshToken.save();
+        } catch (error) {
+            console.error('Token generation error:', error.message);
+            throw 'Authentication error. Please try again later.';
+        }
 
-    await refreshToken.save();
-
-    console.log(`Successfully authenticated ${email}`);
-    
-    return {
-        ...basicDetails(account),
-        jwtToken,
-        refreshToken: refreshToken.token
-    };
+        console.log(`Successfully authenticated ${email}`);
+        
+        return {
+            ...basicDetails(account),
+            jwtToken,
+            refreshToken: refreshToken.token
+        };
+    } catch (error) {
+        console.error('Authentication error:', error);
+        
+        if (typeof error === 'string') {
+            throw error;
+        }
+        
+        throw 'Authentication failed. Please try again later.';
+    }
 }
 
 async function refreshToken({ token, ipAddress }) {
@@ -279,7 +314,7 @@ async function sendVerificationEmail(account, origin) {
     }
 
     const backendUrl = process.env.NODE_ENV === 'production'
-        ? 'https://caharodien-user-management-system-new.onrender.com'
+        ? 'https://user-management-sancija.onrender.com' 
         : 'http://localhost:4000';
     
     const verifyUrl = `${backendUrl}/accounts/verify-email?token=${account.verificationToken}&origin=${encodeURIComponent(origin)}`;

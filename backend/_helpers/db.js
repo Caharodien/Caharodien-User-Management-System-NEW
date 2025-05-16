@@ -139,20 +139,40 @@ async function initialize() {
         };
         
         class MockModel {
-            static findOne() { return Promise.resolve(null); }
-            static findAll() { return Promise.resolve([]); }
-            static create() { return Promise.resolve(null); }
-            static update() { return Promise.resolve([0]); }
-            static destroy() { return Promise.resolve(0); }
-            static count() { return Promise.resolve(0); }
-            static findByPk() { return Promise.resolve(null); }
-            static scope() { return this; }
-            
-            constructor() {}
-            save() { return Promise.resolve(this); }
-            update() { return Promise.resolve(this); }
-            destroy() { return Promise.resolve(this); }
+    static findOne() { return Promise.resolve(null); }
+    static findAll() { return Promise.resolve([]); }
+    static create() { return Promise.resolve(null); }
+    static update() { return Promise.resolve([0]); }
+    static destroy() { return Promise.resolve(0); }
+    static count() { return Promise.resolve(0); }
+    static findByPk() { return Promise.resolve(null); }
+    
+    static scope(scopeName) { 
+        console.log(`MockModel: Using scope ${scopeName}`);
+        if (scopeName === 'withHash') {
+            return {
+                findOne: () => Promise.resolve({
+                    id: null,
+                    email: null,
+                    passwordHash: null, 
+                    isVerified: false,
+                    role: null,
+                    isActive: true,
+                    created: new Date(),
+                    save: () => Promise.resolve({}),
+                    update: () => Promise.resolve({}),
+                    destroy: () => Promise.resolve({})
+                })
+            };
         }
+        return this; 
+    }
+    
+    constructor() {}
+    save() { return Promise.resolve(this); }
+    update() { return Promise.resolve(this); }
+    destroy() { return Promise.resolve(this); }
+}
         
         db.Account = MockModel;
         db.RefreshToken = MockModel;

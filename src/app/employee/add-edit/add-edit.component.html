@@ -1,313 +1,313 @@
 <div class="employee-form-container">
-    <div class="employee-form-card">
-      <div class="form-header">
-        <i class="bi bi-person-plus"></i>
-        <h2>{{isAddMode ? 'Add Employee' : 'Edit Employee'}}</h2>
+  <div class="employee-form-card">
+    <div class="form-header">
+      <i class="bi bi-person-plus"></i>
+      <h2>{{isAddMode ? 'Add Employee' : 'Edit Employee'}}</h2>
+    </div>
+
+    <div class="form-body">
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading employee details...</p>
       </div>
-  
-      <div class="form-body">
-        <!-- Loading State -->
-        <div *ngIf="loading" class="loading-state">
-          <div class="spinner"></div>
-          <p>Loading employee details...</p>
+
+      <!-- Form Content -->
+      <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
+        <!-- Employee ID -->
+        <div class="form-group">
+          <label>Employee ID</label>
+          <input type="text" formControlName="employeeId" 
+                 [ngClass]="{ 'input-error': submitted && f.employeeId.errors }" 
+                 [readonly]="!isAddMode">
+          <div *ngIf="submitted && f.employeeId.errors" class="error-message">
+            <div *ngIf="f.employeeId.errors.required">Employee ID is required</div>
+            <div *ngIf="f.employeeId.errors.maxlength">Must be less than 20 characters</div>
+          </div>
         </div>
-  
-        <!-- Form Content -->
-        <form *ngIf="!loading" [formGroup]="form" (ngSubmit)="onSubmit()">
-          <!-- Employee ID -->
-          <div class="form-group">
-            <label>Employee ID</label>
-            <input type="text" formControlName="employeeId" 
-                   [ngClass]="{ 'input-error': submitted && f.employeeId.errors }" 
-                   [readonly]="!isAddMode">
-            <div *ngIf="submitted && f.employeeId.errors" class="error-message">
-              <div *ngIf="f.employeeId.errors.required">Employee ID is required</div>
-              <div *ngIf="f.employeeId.errors.maxlength">Must be less than 20 characters</div>
-            </div>
+
+        <!-- Account selector -->
+        <div class="form-group">
+          <label>Select Account</label>
+          <select formControlName="accountId" 
+                 [ngClass]="{ 'input-error': submitted && f.accountId.errors }">
+            <option value="">-- Select Account --</option>
+            <option *ngFor="let account of accounts" [value]="account.id">
+              {{account.firstName}} {{account.lastName}} ({{account.email}}) - {{account.role}} 
+              {{!account.isVerified ? '- Inactive' : ''}}
+            </option>
+          </select>
+          <div *ngIf="submitted && f.accountId.errors" class="error-message">
+            <div *ngIf="f.accountId.errors.required">Account selection is required</div>
           </div>
-  
-          <!-- Name Row -->
-          <div class="form-row">
-            <div class="form-group">
-              <label>First Name</label>
-              <input type="text" formControlName="firstName" 
-                     [ngClass]="{ 'input-error': submitted && f.firstName.errors }">
-              <div *ngIf="submitted && f.firstName.errors" class="error-message">
-                <div *ngIf="f.firstName.errors.required">First Name is required</div>
-                <div *ngIf="f.firstName.errors.maxlength">Must be less than 50 characters</div>
-              </div>
-            </div>
-  
-            <div class="form-group">
-              <label>Last Name</label>
-              <input type="text" formControlName="lastName" 
-                     [ngClass]="{ 'input-error': submitted && f.lastName.errors }">
-              <div *ngIf="submitted && f.lastName.errors" class="error-message">
-                <div *ngIf="f.lastName.errors.required">Last Name is required</div>
-                <div *ngIf="f.lastName.errors.maxlength">Must be less than 50 characters</div>
-              </div>
-            </div>
+          <small class="form-hint">
+            Select an account to associate with this employee
+          </small>
+        </div>
+
+        <!-- Position -->
+        <div class="form-group">
+          <label>Position</label>
+          <select formControlName="position" 
+                 [ngClass]="{ 'input-error': submitted && f.position.errors }">
+            <option value="">-- Select Position --</option>
+            <option value="Manager">Manager</option>
+            <option value="Team Lead">Team Lead</option>
+            <option value="Developer">Developer</option>
+            <option value="Designer">Designer</option>
+            <option value="QA Engineer">QA Engineer</option>
+            <option value="HR Specialist">HR Specialist</option>
+            <option value="Administrative Staff">Administrative Staff</option>
+          </select>
+          <div *ngIf="submitted && f.position.errors" class="error-message">
+            <div *ngIf="f.position.errors.required">Position is required</div>
           </div>
-  
-          <!-- Email -->
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" formControlName="email" 
-                   [ngClass]="{ 'input-error': submitted && f.email.errors }">
-            <div *ngIf="submitted && f.email.errors" class="error-message">
-              <div *ngIf="f.email.errors.email">Enter a valid email address</div>
-              <div *ngIf="f.email.errors.maxlength">Must be less than 100 characters</div>
-            </div>
+        </div>
+
+        <!-- Department -->
+        <div class="form-group">
+          <label>Department</label>
+          <select formControlName="departmentId" 
+                 [ngClass]="{ 'input-error': submitted && f.departmentId.errors }">
+            <option value="">-- Select Department --</option>
+            <option *ngFor="let department of departments" [value]="department.id">
+              {{department.name}}
+            </option>
+          </select>
+          <div *ngIf="submitted && f.departmentId.errors" class="error-message">
+            <div *ngIf="f.departmentId.errors.required">Department is required</div>
           </div>
-  
-          <!-- Position -->
-          <div class="form-group">
-            <label>Position</label>
-            <input type="text" formControlName="position" 
-                   [ngClass]="{ 'input-error': submitted && f.position.errors }">
-            <div *ngIf="submitted && f.position.errors" class="error-message">
-              <div *ngIf="f.position.errors.required">Position is required</div>
-              <div *ngIf="f.position.errors.maxlength">Must be less than 100 characters</div>
-            </div>
+        </div>
+
+        <!-- Hire Date -->
+        <div class="form-group">
+          <label>Hire Date</label>
+          <input type="date" formControlName="hireDate" 
+                 [ngClass]="{ 'input-error': submitted && f.hireDate.errors }">
+          <div *ngIf="submitted && f.hireDate.errors" class="error-message">
+            <div *ngIf="f.hireDate.errors.required">Hire Date is required</div>
           </div>
-  
-          <!-- Department -->
-          <div class="form-group">
-            <label>Department</label>
-            <select formControlName="departmentId" 
-                   [ngClass]="{ 'input-error': submitted && f.departmentId.errors }">
-              <option value="">-- Select Department --</option>
-              <option *ngFor="let department of departments" [value]="department.id">
-                {{department.name}}
-              </option>
-            </select>
-            <div *ngIf="submitted && f.departmentId.errors" class="error-message">
-              <div *ngIf="f.departmentId.errors.required">Department is required</div>
-            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="form-group">
+          <label>Status</label>
+          <select formControlName="status" 
+                 [ngClass]="{ 
+                   'input-error': submitted && f.status.errors,
+                   'status-active': form.value.status === 'Active',
+                   'status-inactive': form.value.status === 'Inactive'
+                 }">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+          <div *ngIf="submitted && f.status.errors" class="error-message">
+            <div *ngIf="f.status.errors.required">Status is required</div>
           </div>
-  
-          <!-- Hire Date -->
-          <div class="form-group">
-            <label>Hire Date</label>
-            <input type="date" formControlName="hireDate" 
-                   [ngClass]="{ 'input-error': submitted && f.hireDate.errors }">
-            <div *ngIf="submitted && f.hireDate.errors" class="error-message">
-              <div *ngIf="f.hireDate.errors.required">Hire Date is required</div>
-            </div>
-          </div>
-  
-          <!-- Status (Edit Mode Only) -->
-          <div class="form-group" *ngIf="!isAddMode">
-            <label>Status</label>
-            <select formControlName="status" 
-                   [ngClass]="{ 'input-error': submitted && f.status.errors }">
-              <option value="Active">Active</option>
-              <option value="On Leave">On Leave</option>
-              <option value="Terminated">Terminated</option>
-            </select>
-            <div *ngIf="submitted && f.status.errors" class="error-message">
-              <div *ngIf="f.status.errors.required">Status is required</div>
-            </div>
-          </div>
-  
-          <!-- Form Actions -->
-          <div class="form-actions">
-            <a routerLink="/employee" class="back-btn">
-              <i class="bi bi-arrow-left"></i>
-              <span>Back to Employees</span>
-            </a>
-            <button type="submit" [disabled]="loading" class="submit-btn">
-              <span *ngIf="loading" class="spinner"></span>
-              <i *ngIf="!loading" class="bi bi-save"></i>
-              <span>Save Employee</span>
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <a routerLink="/employee" class="back-btn">
+            <i class="bi bi-arrow-left"></i>
+            <span>Back to Employees</span>
+          </a>
+          <button type="submit" [disabled]="loading" class="submit-btn">
+            <span *ngIf="loading" class="spinner"></span>
+            <i *ngIf="!loading" class="bi bi-save"></i>
+            <span>Save Employee</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
-  
-  <style>
-  .employee-form-container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-  }
-  
-  .employee-form-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-  }
-  
-  .form-header {
-    background: linear-gradient(135deg, #4361ee, #3a0ca3);
-    padding: 1.5rem;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  
-  .form-header i {
-    font-size: 1.5rem;
-  }
-  
-  .form-header h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-  }
-  
-  .form-body {
-    padding: 2rem;
-  }
-  
-  .loading-state {
-    display: flex;
+</div>
+
+<style>
+.employee-form-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.employee-form-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.form-header {
+  background: linear-gradient(135deg, #4361ee, #3a0ca3);
+  padding: 1.5rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.form-header i {
+  font-size: 1.5rem;
+}
+
+.form-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.form-body {
+  padding: 2rem;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+}
+
+.loading-state p {
+  margin: 0;
+  color: #495057;
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(67, 97, 238, 0.2);
+  border-radius: 50%;
+  border-top-color: #4361ee;
+  animation: spin 1s linear infinite;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #495057;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+input, select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+input:focus, select:focus {
+  border-color: #4361ee;
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+  outline: none;
+}
+
+input[readonly] {
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+.input-error {
+  border-color: #dc3545;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+}
+
+.status-active {
+  border-color: #28a745;
+}
+
+.status-inactive {
+  border-color: #dc3545;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f1f3f5;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #e2e8f0;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+}
+
+.submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #4361ee;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+  background: #3a0ca3;
+  transform: translateY(-2px);
+}
+
+.submit-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .form-actions {
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem;
     gap: 1rem;
   }
   
-  .loading-state p {
-    margin: 0;
-    color: #495057;
-  }
-  
-  .spinner {
-    width: 2rem;
-    height: 2rem;
-    border: 3px solid rgba(67, 97, 238, 0.2);
-    border-radius: 50%;
-    border-top-color: #4361ee;
-    animation: spin 1s linear infinite;
-  }
-  
-  .form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 1rem;
-  }
-  
-  .form-group {
-    margin-bottom: 1.5rem;
-  }
-  
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: #495057;
-  }
-  
-  input, select {
+  .back-btn, .submit-btn {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
+    justify-content: center;
   }
-  
-  input:focus, select:focus {
-    border-color: #4361ee;
-    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
-    outline: none;
-  }
-  
-  input[readonly] {
-    background-color: #f8f9fa;
-    color: #6c757d;
-  }
-  
-  .input-error {
-    border-color: #dc3545;
-  }
-  
-  .input-error:focus {
-    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
-  }
-  
-  .error-message {
-    color: #dc3545;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-  }
-  
-  .form-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #f1f3f5;
-  }
-  
-  .back-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #f8f9fa;
-    color: #495057;
-    border: 1px solid #e2e8f0;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
-  }
-  
-  .back-btn:hover {
-    background: #e9ecef;
-    transform: translateY(-2px);
-  }
-  
-  .submit-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #4361ee;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .submit-btn:hover {
-    background: #3a0ca3;
-    transform: translateY(-2px);
-  }
-  
-  .submit-btn:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-    transform: none;
-  }
-  
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  
-  @media (max-width: 768px) {
-    .form-row {
-      grid-template-columns: 1fr;
-    }
-    
-    .form-actions {
-      flex-direction: column;
-      gap: 1rem;
-    }
-    
-    .back-btn, .submit-btn {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-  </style>
+}
+</style>

@@ -28,14 +28,14 @@ function model(sequelize) {
             }
         }
     };
-    
+
     const options = {
         timestamps: false,
         defaultScope: {
-        attributes: { exclude: ['passwordHash'] }
+            attributes: { exclude: ['passwordHash'] }
         },
         scopes: {
-        withHash: { attributes: {}, } 
+            withHash: { attributes: { include: ['passwordHash'] } }
         }
     };
     return sequelize.define('account', attributes, options);
