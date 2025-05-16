@@ -314,7 +314,7 @@ async function sendVerificationEmail(account, origin) {
     }
 
     const backendUrl = process.env.NODE_ENV === 'production'
-        ? 'https://user-management-sancija.onrender.com' 
+        ? 'https://caharodien-user-management-system-new.onrender.com' 
         : 'http://localhost:4000';
     
     const verifyUrl = `${backendUrl}/accounts/verify-email?token=${account.verificationToken}&origin=${encodeURIComponent(origin)}`;
