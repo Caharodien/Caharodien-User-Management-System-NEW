@@ -1,0 +1,308 @@
+<div class="employee-form-container">
+    <div class="employee-form-card">
+        <div class="form-header">
+            <i class="bi bi-arrows-move"></i>
+            <h2>Transfer Employee</h2>
+        </div>
+
+        <div class="form-body">
+            <!-- Loading State -->
+            <div *ngIf="loading" class="loading-state">
+                <div class="spinner"></div>
+                <p>Loading employee details...</p>
+            </div>
+
+            <div *ngIf="!loading">
+                <!-- Information Alert -->
+
+                <!-- Employee Information -->
+                <div class="employee-info">
+                    <h3>Employee Information</h3>
+                    <div class="info-card">
+                        <div class="info-item">
+                            <span class="info-label">Employee ID:</span>
+                            <span class="info-value">{{employee.employeeId}}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Name:</span>
+                            <span class="info-value">{{employee.account?.firstName}} {{employee.account?.lastName}}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Position:</span>
+                            <span class="info-value">{{employee.position}}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Current Department:</span>
+                            <span class="info-value">{{employee.department?.name}}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transfer Form -->
+                <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                    <div class="form-group">
+                        <label>New Department</label>
+                        <select formControlName="departmentId" 
+                               [ngClass]="{ 'input-error': submitted && f.departmentId.errors }">
+                            <option value="">-- Select New Department --</option>
+                            <option *ngFor="let department of departments" [value]="department.id">
+                                {{department.name}}
+                            </option>
+                        </select>
+                        <div *ngIf="submitted && f.departmentId.errors" class="error-message">
+                            <div *ngIf="f.departmentId.errors.required">New Department is required</div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <a routerLink="../details/{{employee.id}}" class="back-btn">
+                            <i class="bi bi-arrow-left"></i>
+                            <span>Back to Details</span>
+                        </a>
+                        <button type="submit" [disabled]="submitting" class="submit-btn">
+                            <span *ngIf="submitting" class="spinner"></span>
+                            <i *ngIf="!submitting" class="bi bi-check-circle"></i>
+                            <span>Transfer Employee</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.employee-form-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.employee-form-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.form-header {
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
+    padding: 1.5rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.form-header i {
+    font-size: 1.5rem;
+}
+
+.form-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.form-body {
+    padding: 2rem;
+}
+
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 1rem;
+}
+
+.loading-state p {
+    margin: 0;
+    color: #495057;
+}
+
+.spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid rgba(67, 97, 238, 0.2);
+    border-radius: 50%;
+    border-top-color: #4361ee;
+    animation: spin 1s linear infinite;
+}
+
+.info-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+    background-color: #e7f5ff;
+    border-left: 4px solid #4361ee;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+}
+
+.info-alert i {
+    color: #4361ee;
+    font-size: 1.25rem;
+    margin-top: 0.125rem;
+}
+
+.info-alert p {
+    margin: 0;
+    color: #495057;
+}
+
+.employee-info {
+    margin-bottom: 2rem;
+}
+
+.employee-info h3 {
+    font-size: 1.25rem;
+    color: #495057;
+    margin-bottom: 1rem;
+}
+
+.info-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    margin-bottom: 0.75rem;
+}
+
+.info-item:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #495057;
+    min-width: 150px;
+}
+
+.info-value {
+    color: #212529;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+}
+
+select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+select:focus {
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    outline: none;
+}
+
+.input-error {
+    border-color: #dc3545;
+}
+
+.input-error:focus {
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f1f3f5;
+}
+
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.submit-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #4361ee;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    background: #3a0ca3;
+    transform: translateY(-2px);
+}
+
+.submit-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .form-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .back-btn, .submit-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .info-item {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .info-label {
+        min-width: auto;
+    }
+}
+</style>

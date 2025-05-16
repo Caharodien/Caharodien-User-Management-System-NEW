@@ -1,344 +1,343 @@
 <div class="employees-container">
-    <div class="employees-card">
-      <div class="employees-header">
-        <div class="header-content">
-          <i class="bi bi-people"></i>
-          <h2>Employees</h2>
-        </div>
-        <a routerLink="add" class="add-employee-btn">
-          <i class="bi bi-plus-circle"></i>
-          <span>Add Employee</span>
-        </a>
+  <div class="employees-card">
+    <div class="employees-header">
+      <div class="header-content">
+        <i class="bi bi-people"></i>
+        <h2>Employees</h2>
       </div>
-  
-      <div class="employees-body">
-        <!-- Loading State -->
-        <div *ngIf="loading" class="loading-state">
-          <div class="spinner"></div>
-          <p>Loading employees...</p>
-        </div>
-        
-        <!-- Empty State -->
-        <div *ngIf="!loading && employees.length === 0" class="empty-state">
-          <i class="bi bi-info-circle"></i>
-          <p>No employees found. Add your first employee to get started.</p>
-        </div>
-        
-        <!-- Employees Table -->
-        <div *ngIf="!loading && employees.length > 0" class="table-container">
-          <table class="employees-table">
-            <thead>
-              <tr>
-                <th>Employee ID</th>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Department</th>
-                <th>Status</th>
-                <th class="actions-col">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let employee of employees">
-                <td class="employee-id">
-                  <strong>{{employee.employeeId}}</strong>
-                </td>
-                <td class="employee-name">
-                  {{employee.account?.firstName}} {{employee.account?.lastName}}
-                </td>
-                <td class="employee-position">
-                  {{employee.position}}
-                </td>
-                <td class="employee-department">
-                  {{employee.department?.name || 'N/A'}}
-                </td>
-                <td class="employee-status">
-                  <span class="status-badge" [ngClass]="{
-                    'active': employee.status === 'Active',
-                    'on-leave': employee.status === 'On Leave',
-                    'terminated': employee.status === 'Terminated'
-                  }">
-                    {{employee.status}}
-                  </span>
-                </td>
-                <td class="actions-cell">
-                  <div class="action-buttons">
-                    <a routerLink="details/{{employee.id}}" class="action-btn view-btn" title="View">
-                      <i class="bi bi-eye"></i>
-                    </a>
-                    <a routerLink="edit/{{employee.id}}" class="action-btn edit-btn" title="Edit">
-                      <i class="bi bi-pencil"></i>
-                    </a>
-                    <a routerLink="transfer/{{employee.id}}" class="action-btn transfer-btn" title="Transfer">
-                      <i class="bi bi-arrows-move"></i>
-                    </a>
-                    <button (click)="deleteEmployee(employee.id)" [disabled]="deleting" 
-                            class="action-btn delete-btn" title="Delete">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <a routerLink="add" class="add-employee-btn">
+        <i class="bi bi-plus-circle"></i>
+        <span>Add Employee</span>
+      </a>
+    </div>
+
+    <div class="employees-body">
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading employees...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!loading && employees.length === 0" class="empty-state">
+        <i class="bi bi-info-circle"></i>
+        <p>No employees found. Add your first employee to get started.</p>
+      </div>
+
+      <!-- Employees Table -->
+      <div *ngIf="!loading && employees.length > 0" class="table-container">
+        <table class="employees-table">
+          <thead>
+            <tr>
+              <th>Employee ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Position</th>
+              <th>Department</th>
+              <th>Status</th>
+              <th class="actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let employee of employees">
+              <td class="employee-id">
+                <strong>{{employee.employeeId}}</strong>
+              </td>
+              <td class="employee-name">
+                {{employee.account?.firstName}} {{employee.account?.lastName}}
+              </td>
+              <td>{{employee.email}}</td>
+              <td>{{employee.position}}</td>
+              <td>{{employee.department?.name || 'N/A'}}</td>
+              <td class="employee-status">
+                <span class="status-badge" [ngClass]="{
+                  'active': employee.status === 'Active',
+                  'on-leave': employee.status === 'On Leave',
+                  'terminated': employee.status === 'Terminated'
+                }">
+                  {{employee.status}}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <a routerLink="details/{{employee.id}}" class="action-btn view-btn" title="View">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <a routerLink="edit/{{employee.id}}" class="action-btn edit-btn" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <a routerLink="transfer/{{employee.id}}" class="action-btn transfer-btn" title="Transfer">
+                    <i class="bi bi-arrows-move"></i>
+                  </a>
+                  <button (click)="deleteEmployee(employee.id)" [disabled]="deleting" class="action-btn delete-btn" title="Delete">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
-  
-  <style>
-  .employees-container {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
+</div>
+
+<style>
+.employees-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.employees-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.employees-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #4361ee, #3a0ca3);
+  color: white;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-content i {
+  font-size: 1.5rem;
+}
+
+.header-content h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.add-employee-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  color: #4361ee;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.add-employee-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+}
+
+.employees-body {
+  padding: 1.5rem;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+}
+
+.loading-state p {
+  margin: 0;
+  color: #495057;
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(67, 97, 238, 0.2);
+  border-radius: 50%;
+  border-top-color: #4361ee;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
-  
-  .employees-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-  }
-  
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  color: #495057;
+}
+
+.empty-state i {
+  font-size: 1.25rem;
+  color: #4361ee;
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.employees-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.employees-table thead {
+  background: #f8f9fa;
+}
+
+.employees-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.employees-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #f1f3f5;
+  vertical-align: middle;
+}
+
+.employee-id {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.employee-name {
+  font-weight: 500;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+}
+
+.status-badge.on-leave {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+}
+
+.status-badge.terminated {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.actions-cell {
+  text-align: right;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn i {
+  font-size: 0.875rem;
+}
+
+.view-btn {
+  background: rgba(13, 110, 253, 0.1);
+  color: #0d6efd;
+}
+
+.view-btn:hover {
+  background: rgba(13, 110, 253, 0.2);
+}
+
+.edit-btn {
+  background: rgba(108, 117, 125, 0.1);
+  color: #6c757d;
+}
+
+.edit-btn:hover {
+  background: rgba(108, 117, 125, 0.2);
+}
+
+.transfer-btn {
+  background: rgba(23, 162, 184, 0.1);
+  color: #17a2b8;
+}
+
+.transfer-btn:hover {
+  background: rgba(23, 162, 184, 0.2);
+}
+
+.delete-btn {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.delete-btn:hover {
+  background: rgba(220, 53, 69, 0.2);
+}
+
+.delete-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
   .employees-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.25rem 1.5rem;
-    background: linear-gradient(135deg, #4361ee, #3a0ca3);
-    color: white;
-  }
-  
-  .header-content {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  
-  .header-content i {
-    font-size: 1.5rem;
-  }
-  
-  .header-content h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-  }
-  
-  .add-employee-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: white;
-    color: #4361ee;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-  
-  .add-employee-btn:hover {
-    background: rgba(255, 255, 255, 0.9);
-    transform: translateY(-2px);
-  }
-  
-  .employees-body {
-    padding: 1.5rem;
-  }
-  
-  .loading-state {
-    display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem;
+    align-items: flex-start;
     gap: 1rem;
   }
-  
-  .loading-state p {
-    margin: 0;
-    color: #495057;
-  }
-  
-  .spinner {
-    width: 2rem;
-    height: 2rem;
-    border: 3px solid rgba(67, 97, 238, 0.2);
-    border-radius: 50%;
-    border-top-color: #4361ee;
-    animation: spin 1s linear infinite;
-  }
-  
-  .empty-state {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1.5rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-    color: #495057;
-  }
-  
-  .empty-state i {
-    font-size: 1.25rem;
-    color: #4361ee;
-  }
-  
-  .empty-state p {
-    margin: 0;
-  }
-  
-  .table-container {
-    overflow-x: auto;
-  }
-  
-  .employees-table {
+
+  .add-employee-btn {
     width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .employees-table thead {
-    background: #f8f9fa;
-  }
-  
-  .employees-table th {
-    padding: 1rem;
-    text-align: left;
-    font-weight: 600;
-    color: #495057;
-    text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.5px;
-  }
-  
-  .employees-table td {
-    padding: 1rem;
-    border-bottom: 1px solid #f1f3f5;
-    vertical-align: middle;
-  }
-  
-  .employee-id {
-    font-weight: 600;
-    color: #2d3748;
-  }
-  
-  .employee-name {
-    font-weight: 500;
-  }
-  
-  .status-badge {
-    display: inline-block;
-    padding: 0.35rem 0.75rem;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  
-  .status-badge.active {
-    background: rgba(40, 167, 69, 0.1);
-    color: #28a745;
-  }
-  
-  .status-badge.on-leave {
-    background: rgba(255, 193, 7, 0.1);
-    color: #ffc107;
-  }
-  
-  .status-badge.terminated {
-    background: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-  }
-  
-  .actions-cell {
-    text-align: right;
-  }
-  
-  .action-buttons {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-end;
-  }
-  
-  .action-btn {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
   }
-  
-  .action-btn i {
-    font-size: 0.875rem;
+
+  .employees-table th,
+  .employees-table td {
+    padding: 0.75rem;
   }
-  
-  .view-btn {
-    background: rgba(13, 110, 253, 0.1);
-    color: #0d6efd;
+
+  .action-buttons {
+    flex-wrap: wrap;
   }
-  
-  .view-btn:hover {
-    background: rgba(13, 110, 253, 0.2);
-  }
-  
-  .edit-btn {
-    background: rgba(108, 117, 125, 0.1);
-    color: #6c757d;
-  }
-  
-  .edit-btn:hover {
-    background: rgba(108, 117, 125, 0.2);
-  }
-  
-  .transfer-btn {
-    background: rgba(23, 162, 184, 0.1);
-    color: #17a2b8;
-  }
-  
-  .transfer-btn:hover {
-    background: rgba(23, 162, 184, 0.2);
-  }
-  
-  .delete-btn {
-    background: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-  }
-  
-  .delete-btn:hover {
-    background: rgba(220, 53, 69, 0.2);
-  }
-  
-  .delete-btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-  
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  
-  @media (max-width: 768px) {
-    .employees-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1rem;
-    }
-    
-    .add-employee-btn {
-      width: 100%;
-      justify-content: center;
-    }
-    
-    .employees-table th, 
-    .employees-table td {
-      padding: 0.75rem;
-    }
-    
-    .action-buttons {
-      flex-wrap: wrap;
-    }
-  }
-  </style>
+}
+</style>

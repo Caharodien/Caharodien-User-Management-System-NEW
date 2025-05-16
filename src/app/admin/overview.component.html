@@ -1,0 +1,301 @@
+<div class="container mt-4">
+    <div class="row">
+      <div class="col-md-12 mb-4">
+      </div>
+    </div>
+    
+  <style>
+    .admin-box-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+  
+    .admin-box {
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+  
+    .admin-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  
+    .admin-box h3 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 1.25rem;
+    }
+  
+    .admin-box p {
+      color: #666;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
+  
+    .admin-box-link {
+      display: inline-block;
+      background: #0d6efd;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+  
+    .admin-box-link:hover {
+      background: #0b5ed7;
+      color: white;
+    }
+  
+    .alert-info {
+      background-color: #e7f1ff;
+      border-color: #d6e4ff;
+      color: #084298;
+    }
+  
+    /* Coming Soon Styles */
+    .coming-soon {
+      background: #f8f9fa;
+      border: 1px dashed #adb5bd;
+    }
+  
+    .coming-soon h3,
+    .coming-soon p {
+      color: #6c757d;
+    }
+  
+    .coming-soon-badge {
+      display: inline-block;
+      background: #e9ecef;
+      color: #495057;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: default;
+    }
+  </style><div class="admin-dashboard">
+  <div class="admin-notice">
+    <div class="notice-content">
+      <i class="bi bi-info-circle"></i>
+      <span>This section can only be accessed by administrators.</span>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <!-- User Management -->
+    <div class="dashboard-card">
+      <div class="card-icon bg-blue">
+        <i class="bi bi-gear"></i>
+      </div>
+      <h3>User Management</h3>
+      <p>Add, edit, or remove user accounts from the system.</p>
+      <a [routerLink]="['accounts']" class="card-action">
+        <span>Manage Accounts</span>
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <!-- Employee Management -->
+    <div class="dashboard-card">
+      <div class="card-icon bg-green">
+        <i class="bi bi-people-fill"></i>
+      </div>
+      <h3>Employee Management</h3>
+      <p>Manage employees, departments, and positions.</p>
+      <a [routerLink]="['/employee']" class="card-action">
+        <span>Manage Employees</span>
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <!-- Department Management -->
+    <div class="dashboard-card">
+      <div class="card-icon bg-purple">
+        <i class="bi bi-diagram-3"></i>
+      </div>
+      <h3>Department Management</h3>
+      <p>Create and manage organizational departments.</p>
+      <a [routerLink]="['/department']" class="card-action">
+        <span>Manage Departments</span>
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <!-- Workflow Management -->
+    <div class="dashboard-card">
+      <div class="card-icon bg-orange">
+        <i class="bi bi-kanban"></i>
+      </div>
+      <h3>Workflow Management</h3>
+      <p>Track and manage employee workflows and processes.</p>
+      <a [routerLink]="['/workflow']" class="card-action">
+        <span>Manage Workflows</span>
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <!-- Request Management -->
+    <div class="dashboard-card">
+      <div class="card-icon bg-teal">
+        <i class="bi bi-inbox"></i>
+      </div>
+      <h3>Request Management</h3>
+      <p>Process and manage employee requests and approvals.</p>
+      <a [routerLink]="['/request']" class="card-action">
+        <span>Manage Requests</span>
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <!-- Coming Soon -->
+    <div class="dashboard-card coming-soon">
+      <div class="card-icon bg-gray">
+        <i class="bi bi-clock"></i>
+      </div>
+      <h3>Coming Soon</h3>
+      <p>New feature currently in development</p>
+      <div class="coming-soon-label">
+        <i class="bi bi-clock"></i>
+        <span>Coming Soon</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.admin-dashboard {
+  max-width: 1400px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.admin-notice {
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  border-left: 4px solid #1976d2;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
+.notice-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #0d47a1;
+  font-weight: 500;
+}
+
+.notice-content i {
+  font-size: 1.25rem;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.dashboard-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.bg-blue { background: #2196f3; }
+.bg-green { background: #4caf50; }
+.bg-purple { background: #9c27b0; }
+.bg-orange { background: #ff9800; }
+.bg-teal { background: #009688; }
+.bg-gray { background: #607d8b; }
+
+.dashboard-card h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: #263238;
+}
+
+.dashboard-card p {
+  color: #546e7a;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1976d2;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.card-action:hover {
+  color: #0d47a1;
+}
+
+.card-action i {
+  transition: transform 0.2s;
+}
+
+.card-action:hover i {
+  transform: translateX(3px);
+}
+
+/* Coming Soon Styles */
+.coming-soon {
+  background: #f5f5f5;
+  border: 1px dashed #bdbdbd;
+}
+
+.coming-soon h3,
+.coming-soon p {
+  color: #757575;
+}
+
+.coming-soon-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #e0e0e0;
+  color: #616161;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

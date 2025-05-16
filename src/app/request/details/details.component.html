@@ -1,0 +1,129 @@
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div *ngIf="loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading request details...</p>
+            </div>
+            
+            <div *ngIf="!loading">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">
+                            <i class="bi bi-clipboard-check me-2"></i>{{request.type}} Request
+                        </h2>
+                        <a routerLink="../edit/{{request.id}}" class="btn btn-light">
+                            <i class="bi bi-pencil me-1"></i>Edit
+                        </a>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <p><strong>Request ID:</strong> {{request.id}}</p>
+                                <p><strong>Type:</strong> {{request.type}}</p>
+                                <p><strong>Status:</strong> 
+                                    <span [ngClass]="{
+                                        'badge bg-primary': request.status === 'Pending',
+                                        'badge bg-success': request.status === 'Approved',
+                                        'badge bg-danger': request.status === 'Rejected'
+                                    }">
+                                        {{request.status}}
+                                    </span>
+                                </p>
+                                <p><strong>Created:</strong> {{request.created | date:'medium'}}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Employee:</strong> 
+                                    <span *ngIf="request.employee">
+                                        {{request.employee.account?.firstName}} {{request.employee.account?.lastName}}
+                                        <small class="text-muted">({{request.employee.employeeId}})</small>
+                                    </span>
+                                    <span *ngIf="!request.employee" class="text-muted">Unknown</span>
+                                </p>
+                                <p><strong>Employee Position:</strong> {{request.employee?.position || 'N/A'}}</p>
+                                <p><strong>Department:</strong> {{request.employee?.department?.name || 'N/A'}}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4>Description</h4>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <p *ngIf="request.description" class="mb-0">{{request.description}}</p>
+                                    <p *ngIf="!request.description" class="text-muted mb-0">No description provided</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4>Request Items</h4>
+                            <div *ngIf="!request.requestItems || request.requestItems.length === 0" class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>No items found for this request.
+                            </div>
+                            
+                            <div *ngIf="request.requestItems && request.requestItems.length > 0" class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            <th>Quantity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let item of request.requestItems">
+                                            <td><strong>{{item.name}}</strong></td>
+                                            <td>{{item.description || 'N/A'}}</td>
+                                            <td>{{item.quantity}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4>Update Status</h4>
+                            <div class="card">
+                                <div class="card-body">
+                                    <form [formGroup]="statusForm" (ngSubmit)="onSubmit()">
+                                        <div class="mb-3">
+                                            <label class="form-label">Status</label>
+                                            <select formControlName="status" class="form-select" 
+                                                  [ngClass]="{ 'is-invalid': submitted && f.status.errors }">
+                                                <option value="Pending">Pending</option>
+                                                <option value="Approved">Approved</option>
+                                                <option value="Rejected">Rejected</option>
+                                            </select>
+                                            <div *ngIf="submitted && f.status.errors" class="invalid-feedback">
+                                                <div *ngIf="f.status.errors.required">Status is required</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Notes</label>
+                                            <textarea formControlName="description" class="form-control" rows="3"></textarea>
+                                        </div>
+                                        
+                                        <button [disabled]="updating" class="btn btn-primary">
+                                            <span *ngIf="updating" class="spinner-border spinner-border-sm me-1"></span>
+                                            <i *ngIf="!updating" class="bi bi-check-circle me-1"></i>
+                                            Update Status
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a routerLink=".." class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Requests
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

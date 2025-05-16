@@ -1,4 +1,4 @@
-const config = require('config.json');
+const config = require('../config.json'); 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require("crypto");
@@ -6,7 +6,6 @@ const { Op } = require('sequelize');
 const sendEmail = require('../_helpers/send-email');
 const db = require('../_helpers/db');
 const Role = require('../_helpers/role');
-const { param } = require('../_helpers/swagger');
 
 module.exports = {
     authenticate,
@@ -21,144 +20,183 @@ module.exports = {
     getById,
     create,
     update,
+    toggleActivation,
     delete: _delete
 };
 
+async function toggleActivation(id) {
+    const account = await getAccount(id);
+    
+    if (account.role === Role.Admin) {
+        throw 'Admin accounts cannot be deactivated';
+    }
+    account.isActive = !account.isActive;
+
+
+    account.updated = new Date();
+    
+    await account.save();
+    
+    return basicDetails(account);
+}
+
 async function authenticate({ email, password, ipAddress }) {
-    const account = await db.Account.scope('withHash').findOne({ where: { email } });
+    try {
+        console.log(`Login attempt for ${email}`);
+        
+        let account;
+        try {
+            account = await db.Account.scope('withHash').findOne({ where: { email } });
+        } catch (error) {
+            console.error('Error querying account:', error.message);
+            throw 'Database error. Please try again later.';
+        }
+        
+        if (!account) {
+            console.log(`Account not found for ${email}`);
+            throw 'Email or password is incorrect';
+        }
+        
+        console.log(`Account found, details:`);
+        console.log(`- Email: ${account.email ?? 'undefined'}`);
+        console.log(`- Verified field: ${account.verified ?? 'undefined'}`);
+        console.log(`- PasswordReset field: ${account.passwordReset ?? 'undefined'}`);
+        
+        if (db.isConnected === false) {
+            console.log('Using mock database - authentication disabled');
+            throw 'Authentication service is temporarily unavailable. Please try again later.';
+        }
+        
+        const isVerified = !!(account.verified || account.passwordReset);
+        console.log(`- isVerified computed value: ${isVerified}`);
+        
+        if ((account.role !== Role.Admin) && (account.isActive === false)) {
+            console.log(`Account ${email} is deactivated`);
+            throw 'Your account has been deactivated. Please contact an administrator.';
+        }
+        
+        if (!isVerified) {
+            console.log(`Account ${email} is not verified`);
+            throw 'Please verify your email before logging in';
+        }
+        
+        if (!account.passwordHash) {
+            console.log(`No password hash available for ${email}`);
+            throw 'Authentication error. Please try again later.';
+        }
+        
+        try {
+            const passwordValid = await bcrypt.compare(password, account.passwordHash);
+            if (!passwordValid) {
+                console.log(`Invalid password for ${email}`);
+                throw 'Email or password is incorrect';
+            }
+        } catch (error) {
+            console.error('Password comparison error:', error.message);
+            throw 'Authentication error. Please try again later.';
+        }
+        
+        let jwtToken, refreshToken;
+        try {
+            jwtToken = generateJwtToken(account);
+            refreshToken = generateRefreshToken(account, ipAddress);
+            await refreshToken.save();
+        } catch (error) {
+            console.error('Token generation error:', error.message);
+            throw 'Authentication error. Please try again later.';
+        }
 
-    if (!account || !account.isVerified || (!await bcrypt.compare(password, account.passwordHash))) {
-    throw 'Email or password is incorrect';
+        console.log(`Successfully authenticated ${email}`);
+        
+        return {
+            ...basicDetails(account),
+            jwtToken,
+            refreshToken: refreshToken.token
+        };
+    } catch (error) {
+        console.error('Authentication error:', error);
+        
+        if (typeof error === 'string') {
+            throw error;
+        }
+        
+        throw 'Authentication failed. Please try again later.';
     }
-    backend/accounts/account.service.js
-    console.log(`Account found, details:`);
-    console.log(`- Email: ${account.email}`);
-    console.log(`- Verified field: ${account.verified}`);
-    console.log(`- PasswordReset field: ${account.passwordReset}`);
-    console.log(`- isVerified computed value: ${account.isVerified}`);
-    
-    if (account.role !== Role.Admin && account.isActive === false) {
-        console.log(`Account ${email} is deactivated`);
-        throw 'Your account has been deactivated. Please contact an administrator.';
-    }
-    
-    if (account.verified || account.passwordReset) {
-        console.log('Manually verifying account based on verified/passwordReset fields');
-        account.isVerified = true;
-    }
-    
-    if (!account.isVerified) {
-        console.log(`Account ${email} is not verified`);
-        throw 'Please verify your email before logging in';
-    }
-    
-    const passwordValid = await bcrypt.compare(password, account.passwordHash);
-    if (!passwordValid) {
-        console.log(`Invalid password for ${email}`);
-        throw 'Email or password is incorrect';
-    }
-    
-
-
-    // authentication successful so generate jwt and refresh tokens
-    accounts/account.service.js
-    const jwtToken = generateJwtToken(account);
-    const refreshToken = generateRefreshToken(account, ipAddress);
-
-    // save refresh token
-    await refreshToken.save();
-
-    // return basic details and tokens
-    return {
-    ...basicDetails(account),
-    jwtToken,
-    refreshToken: refreshToken.token
-};
 }
 
 async function refreshToken({ token, ipAddress }) {
     const refreshToken = await getRefreshToken(token);
     const account = await refreshToken.getAccount();
 
-    // replace old refresh token with a new one and save
     const newRefreshToken = generateRefreshToken(account, ipAddress);
     refreshToken.revoked = Date.now();
     refreshToken.revokedByIp = ipAddress;
     refreshToken.replaceByToken = newRefreshToken.token;
     await refreshToken.save();
     await newRefreshToken.save();
-
-    // generate new jwt
     const jwtToken = generateJwtToken(account);
-
-    // return basic details and tokens
     return {
-    ...basicDetails(account),
-    jwtToken,
-    refreshToken: newRefreshToken.token
-};
+        ...basicDetails(account),
+        jwtToken,
+        refreshToken: newRefreshToken.token
+    };
 }
 
 async function revokeToken({token, ipAddress}) {
     const refreshToken = await getRefreshToken(token);
-
-    // revoke token and save
     refreshToken.revoked = Date.now();
     refreshToken.revokedByIp = ipAddress;
     await refreshToken.save();
 }
 
 async function register(params, origin) {
-    // validate
     if (await db.Account.findOne({ where: { email: params.email } }) ) {
-    // send already registered error in email to prevent account enumeration
     return await sendAlreadyRegisteredEmail(params.email, origin);
     }
-
-    // create account object
     const account = new db.Account(params);
-
-    // first registered account is an admin
     const isFirstAccount = (await db.Account.count()) === 0;
     account.role = isFirstAccount ? Role.Admin : Role.User;
     account.verificationToken = randomTokenString();
-
-    // hash password
     account.passwordHash = await hash(params.password);
-
-    // save account
     await account.save();
-
-    // send email
     await sendVerificationEmail(account, origin);
 }
 
 async function verifyEmail({ token }) {
+    console.log(`Starting verification with token: ${token}`);
     const account = await db.Account.findOne({ where: { verificationToken: token } });
-
-   if (!account) throw 'Verification failed';
-
-    account.verified = Date.now();
+    if (!account) {
+        console.log(`Verification failed: No account found with token: ${token}`);
+        throw 'Verification failed';
+    }
+    console.log(`Account found for verification: ${account.email}`);
+    console.log(`Current account state: verified=${account.verified}, verificationToken=${account.verificationToken}`);
+    account.verified = new Date();
     account.verificationToken = null;
-    await account.save();
+    try {
+        await account.save();
+        console.log(`Account saved after verification: ${account.email}`);
+        const verifiedAccount = await db.Account.findByPk(account.id);
+        console.log(`Verified status after save: email=${verifiedAccount.email}, verified=${verifiedAccount.verified}, verificationToken=${verifiedAccount.verificationToken}`);
+        console.log(`isVerified computation: ${verifiedAccount.isVerified}`);
+        
+        return true;
+    } catch (error) {
+        console.error(`Error saving account during verification: ${error.message}`);
+        throw 'Verification failed due to database error';
+    }
 }
 
 async function forgotPassword({ email }, origin) {
    const account = await db.Account.findOne({ where: { email } });
-
-    // always return ok response to prevent email enumeration
     if (!account) return;
-
-    // create reset token that expires after 24 hours
     account.resetToken = randomTokenString();
     account.resetTokenExpires = new Date(Date.now() + 24*60*60*1000);
     await account.save();
-
-   // send email
     await sendPasswordResetEmail(account, origin);
- }
+}
 
- async function validateResetToken({ token }) {
+async function validateResetToken({ token }) {
     const account = await db.Account.findOne({
     where: {
     resetToken: token,
@@ -169,12 +207,10 @@ async function forgotPassword({ email }, origin) {
     if (!account) throw 'Invalid token';
 
     return account;
- }
+}
 
 async function resetPassword({ token, password }) {
     const account = await validateResetToken({ token });
-
-    // update password and remove reset token
     account.passwordHash = await hash(password);
     account.passwordReset = Date.now();
     account.resetToken = null;
@@ -192,18 +228,13 @@ async function getById(id) {
 }
 
 async function create(params) {
-    // validate
     if (await db.Account.findOne({ where: { email: params.email } }) ) {
     throw 'Email " ' + params.email + ' " is already registered';
     }
 
     const account = new db.Account(params);
     account.verified = Date.now();
-
-    // hash password
     account.passwordHash = await hash(params.password);
-
-    // save account
     await account.save();
 
     return basicDetails(account);
@@ -211,17 +242,12 @@ async function create(params) {
 
 async function update(id, params) {
     const account = await getAccount(id);
-
     if (params.email && account.email !== params.email && await db.Account.findOne({ where: { email: params.email }})) {
         throw 'Email "' + params.email + ' " is already taken';
     }
-
-    // hash password if it was entered
     if (params.password) {
         params.passwordHash = await hash(params.password);
     }
-
-    // copy params to account and save
     Object.assign(account, params);
     account.updated = Date.now();
     await account.save();
@@ -231,17 +257,15 @@ async function update(id, params) {
 
 async function _delete(id) {
     const account = await getAccount(id);
-
     
     if (account.role === Role.Admin) {
         throw 'Admin accounts cannot be deleted';
     }
     
-    accounts/account.service.js
     await account.destroy();
+    
+    return { message: 'Account deleted successfully' };
 }
-
-// helper functions
 
 async function getAccount(id) {
     const account = await db.Account.findByPk(id); 
@@ -260,12 +284,10 @@ async function hash(password) {
 }
 
 function generateJwtToken(account) {
-    // create a jwt token containing the account id that expires in 15 minutes
     return jwt.sign({ sub: account.id, id: account.id }, config.secret, { expiresIn: '15m' });
 }
 
 function generateRefreshToken (account, ipAddress) {
-    // create a refress token that expires in 7 days
     return new db.RefreshToken({
         accountId: account.id,
         token: randomTokenString(),
@@ -279,12 +301,13 @@ function randomTokenString() {
 }
 
 function basicDetails(account) {
-    const { id, title, firstName, lastName, email, role, created, updated, isVerified} = account;
-    return { id, title, firstName, lastName, email, role, created, updated, isVerified};
+    const { id, title, firstName, lastName, email, role, created, updated, isVerified, isActive } = account;
+    return { id, title, firstName, lastName, email, role, created, updated, isVerified, isActive };
 }
 
 async function sendVerificationEmail(account, origin) {
     let message;
+
     if (!account || !account.email) {
         console.error('Cannot send verification email: account or email is missing');
         throw new Error('No recipients defined');
@@ -314,24 +337,6 @@ async function sendVerificationEmail(account, origin) {
         console.error(`Failed to send verification email to ${account.email}:`, error);
         throw error;
     }
-
-    if (origin) {
-        const verifyUrl = `${origin}/account/verify-email?token=${account.verificationToken}`;
-        message = `<p>Please click the below Link to verify your email address:</p>
-                   <p><a href="${verifyUrl}">${verifyUrl}</a></p>`;
-    } else {
-        message = `<p>Please use the below token to verify your email address with the <code>/account/verify-email</code> api route:</p>
-                   <p><code>${account.verificationToken}</code></p>`;
-    }
-
-    await sendEmail({
-        to: account.email,
-        subject: 'Sign-up Verification API - Verify Email',
-        html: `<h4>Verify Email</h4>
-               <p>Thanks for registering!</p>
-               ${message}`
-    });
-accounts/account.service.js
 }
 
 async function sendAlreadyRegisteredEmail(email, origin) {

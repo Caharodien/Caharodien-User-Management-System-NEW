@@ -1,0 +1,55 @@
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0" style="box-shadow: none; padding: 30px;">
+                <div class="card-header bg-white text-center py-3 border-0">
+                    <h3 class="my-0" style="font-weight: 600; color: #333; margin-bottom: 15px;">Login</h3>
+                </div>
+                <div class="card-body p-0">
+                    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+                        <div class="mb-4">
+                            <label class="form-label" style="font-weight: 500; color: #333;">Email ID</label>
+                            <input type="email" formControlName="email" class="form-control" 
+                                style="border-radius: 4px; border: 1px solid #ddd; padding: 10px 12px; height: 45px;"
+                                placeholder="Enter your email" 
+                                [ngClass]="{ 'is-invalid': submitted && f.email.errors }" />
+                            <div *ngIf="submitted && f.email.errors" class="invalid-feedback">
+                                <div *ngIf="f.email.errors.required">Email is required</div>
+                                <div *ngIf="f.email.errors.email">Email is invalid</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label" style="font-weight: 500; color: #333;">Password</label>
+                                <a routerLink="../forgot-password" class="text-decoration-none" style="color: #555;">Forgot Password?</a>
+                            </div>
+                            <input type="password" formControlName="password" class="form-control" 
+                                style="border-radius: 4px; border: 1px solid #ddd; padding: 10px 12px; height: 45px;"
+                                placeholder="Enter your password" 
+                                [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
+                            <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+                                <div *ngIf="f.password.errors.required">Password is required</div>
+                            </div>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe" style="color: #555;">Remember me</label>
+                        </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" [disabled]="loading" class="btn py-2" 
+                                style="background-color: #4e73df; color: white; border: none; border-radius: 4px; font-weight: 600; text-transform: uppercase; height: 45px;">
+                                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                                <span *ngIf="!loading">LOGIN</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer bg-white py-3 text-center border-0">
+                    <div class="text-muted">Don't have an account? 
+                        <a routerLink="../register" class="text-primary">Register</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
