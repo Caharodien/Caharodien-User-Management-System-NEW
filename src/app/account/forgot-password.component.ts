@@ -1,20 +1,26 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { first } from 'rxjs/operators';
+import { Router } from '@angular/router';
 import { AccountService, AlertService } from '../_services';
-@Component({ 
+
+@Component({
     templateUrl: 'forgot-password.component.html',
-    standalone: false // Explicitly set to false
+    standalone: true,
+    imports: [CommonModule, ReactiveFormsModule] 
 })
 export class ForgotPasswordComponent implements OnInit {
     form!: FormGroup;
     loading = false;
     submitted = false;
+
     constructor(
         private formBuilder: FormBuilder,
         private accountService: AccountService,
-        private alertService: AlertService
-    ) { }
+        private alertService: AlertService,
+        private router: Router
+    ) {}
 
     ngOnInit() {
         this.form = this.formBuilder.group({
@@ -22,16 +28,14 @@ export class ForgotPasswordComponent implements OnInit {
         });
     }
 
-    // convenience getter for easy access to form fields
-    get f() { return this.form.controls; }
+    get f() {
+        return this.form.controls;
+    }
 
     onSubmit() {
         this.submitted = true;
-
-        // reset alerts on submit
         this.alertService.clear();
 
-        // stop here if form is invalid
         if (this.form.invalid) {
             return;
         }

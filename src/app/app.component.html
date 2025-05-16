@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <div class="app-container" [ngClass]="{ 'bg-page': account }">
     <nav class="navbar navbar-expand-lg custom-navbar shadow-sm" *ngIf="account">
         <div class="container">
@@ -33,30 +32,11 @@
                     </li>
                 </ul>
             </div>
-=======
-<div class="app-container" [ngClass]="{ 'bg-light': user }">
-    <!-- main nav -->
-    <nav class="navbar navbar-expand navbar-dark bg-dark" *ngIf="user">
-        <div class="navbar-nav">
-            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item nav-link">Home</a>
-            <a routerLink="/profile" routerLinkActive="active" class="nav-item nav-link">Profile</a>
-            <a *ngIf="user.role === Role.Admin" routerLink="/admin" routerLinkActive="active" class="nav-item nav-link">Admin</a>
-            <a (click)="logout()" class="nav-item nav-link">Logout</a>
->>>>>>> 384b3717032c7c1e722fda52b43beb7d3ade4311
         </div>
     </nav>
 
-    <!-- subnav router outlet -->
     <router-outlet name="subnav"></router-outlet>
-<<<<<<< HEAD
     <alert></alert>
-=======
-    
-    <!-- global alert -->
-    <alert></alert>
-    
-    <!-- main router outlet -->
->>>>>>> 384b3717032c7c1e722fda52b43beb7d3ade4311
     <router-outlet></router-outlet>
 </div>
 

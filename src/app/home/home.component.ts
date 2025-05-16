@@ -4,6 +4,6 @@ import { AccountService } from '../_services/account.service';
 export class HomeComponent {
     account: any;
     constructor(private accountService: AccountService) {       
-        this.account = this.accountService.userValue; 
+        this.account = this.accountService.accountValue; 
     }
 }

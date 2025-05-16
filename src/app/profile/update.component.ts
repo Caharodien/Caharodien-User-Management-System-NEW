@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { UntypedFormBuilder, UntypedFormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { first } from 'rxjs/operators';
@@ -11,7 +11,8 @@ import { MustMatch } from '../_helpers';
     standalone: true,
     imports: [
         CommonModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        RouterModule
     ]
 })
 export class UpdateComponent implements OnInit {
@@ -28,7 +29,7 @@ export class UpdateComponent implements OnInit {
         private accountService: AccountService,
         private alertService: AlertService
     ) { 
-        this.account = this.accountService.userValue;
+        this.account = this.accountService.accountValue;
     }
 
     ngOnInit() {

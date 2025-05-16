@@ -1,4 +1,3 @@
-// src/app/admin/accounts/accounts.module.ts
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -12,10 +11,9 @@ import { AddEditComponent } from './add-edit.component';
         CommonModule,
         ReactiveFormsModule,
         AccountsRoutingModule,
-        // Import standalone components
         ListComponent,
         AddEditComponent
-    ],
-    // No declarations
+    ]
+
 })
 export class AccountsModule { }

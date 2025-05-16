@@ -1,12 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { first } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 import { AccountService, AlertService } from '@app/_services';
 import { MustMatch } from '@app/_helpers';
 
-@Component({ templateUrl: 'add-edit.component.html' })
+@Component({
+    standalone: true,
+    imports: [CommonModule, RouterModule, ReactiveFormsModule],
+    templateUrl: 'add-edit.component.html'
+})
 export class AddEditComponent implements OnInit {
     form!: UntypedFormGroup;
     id?: string;
@@ -32,10 +38,12 @@ export class AddEditComponent implements OnInit {
             lastName: ['', Validators.required],
             email: ['', [Validators.required, Validators.email]],
             role: ['', Validators.required],
-            password: ['', [Validators.minLength(6), this.isAddMode ? Validators.required : Validators.nullValidator]]
+            password: ['', [Validators.minLength(6), this.isAddMode ? Validators.required : Validators.nullValidator]],
+            confirmPassword: ['', this.isAddMode ? Validators.required : Validators.nullValidator]
         }, {
             validator: MustMatch('password', 'confirmPassword')
         });
+        
         
         if (!this.isAddMode) {
             this.accountService.getById(this.id!)
@@ -56,8 +64,7 @@ export class AddEditComponent implements OnInit {
         // stop here if form is invalid
         if (this.form.invalid) {
             return;
-        }
-        
+        }  
         this.loading = true;
         if (this.isAddMode) {
             this.createAccount();
