@@ -1,0 +1,480 @@
+<div class="employee-details-container">
+    <div class="employee-details-card">
+        <!-- Loading State -->
+        <div *ngIf="loading" class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading employee details...</p>
+        </div>
+
+        <div *ngIf="!loading">
+            <!-- Employee Details Section -->
+            <div class="details-section">
+                <div class="section-header">
+                    <i class="bi bi-person-badge"></i>
+                    <h2>Employee Details</h2>
+                    <div class="action-buttons">
+                        <a [routerLink]="['/employee/edit', employee.id]" class="edit-btn">
+                            <i class="bi bi-pencil"></i>
+                            <span>Edit</span>
+                        </a>
+                        <a [routerLink]="['/employee/transfer', employee.id]" class="transfer-btn">
+                            <i class="bi bi-arrows-move"></i>
+                            <span>Transfer</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="section-body">
+                    <div class="details-grid">
+                        <div class="details-column">
+                            <div class="detail-item">
+                                <span class="detail-label">Employee ID:</span>
+                                <span class="detail-value">{{employee.employeeId}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Name:</span>
+                                <span class="detail-value">{{employee.account?.firstName}} {{employee.account?.lastName}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Email:</span>
+                                <span class="detail-value">{{employee.account?.email}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Position:</span>
+                                <span class="detail-value">{{employee.position}}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="details-column">
+                            <div class="detail-item">
+                                <span class="detail-label">Department:</span>
+                                <span class="detail-value">{{employee.department?.name}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Hire Date:</span>
+                                <span class="detail-value">{{employee.hireDate | date:'mediumDate'}}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Status:</span>
+                                <span class="detail-value status-badge" 
+                                      [ngClass]="{
+                                        'status-active': employee.status === 'Active',
+                                        'status-on-leave': employee.status === 'On Leave',
+                                        'status-terminated': employee.status === 'Terminated'
+                                      }">
+                                    {{employee.status}}
+                                </span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Created:</span>
+                                <span class="detail-value">{{employee.created | date:'medium'}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflows Section -->
+            <div class="details-section">
+                <div class="section-header">
+                    <i class="bi bi-list-check"></i>
+                    <h2>Workflows</h2>
+                    <a routerLink="/workflow/add" [queryParams]="{ employeeId: employee.id }" class="new-btn">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>New Workflow</span>
+                    </a>
+                </div>
+                
+                <div class="section-body">
+                    <div *ngIf="workflowsLoading" class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Loading workflows...</p>
+                    </div>
+                    
+                    <div *ngIf="!workflowsLoading && workflows.length === 0" class="empty-state">
+                        <i class="bi bi-info-circle"></i>
+                        <p>No workflows found for this employee.</p>
+                    </div>
+                    
+                    <div *ngIf="!workflowsLoading && workflows.length > 0" class="workflows-table">
+                        <div class="table-header">
+                            <div class="table-cell">Type</div>
+                            <div class="table-cell">Status</div>
+                            <div class="table-cell">Created</div>
+                            <div class="table-cell">Details</div>
+                        </div>
+                        
+                        <div class="table-row" *ngFor="let workflow of workflows">
+                            <div class="table-cell"><strong>{{workflow.type}}</strong></div>
+                            <div class="table-cell">
+                                <span class="status-badge" 
+                                      [ngClass]="{
+                                        'status-pending': workflow.status === 'Pending',
+                                        'status-approved': workflow.status === 'Approved',
+                                        'status-rejected': workflow.status === 'Rejected'
+                                      }">
+                                    {{workflow.status}}
+                                </span>
+                            </div>
+                            <div class="table-cell">{{workflow.created | date:'medium'}}</div>
+                            <div class="table-cell">
+                                <button type="button" class="view-btn">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Requests Section -->
+            <div class="details-section">
+                <div class="section-header">
+                    <i class="bi bi-clipboard-check"></i>
+                    <h2>Requests</h2>
+                    <a routerLink="/request/add" [queryParams]="{ employeeId: employee.id }" class="new-btn">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>New Request</span>
+                    </a>
+                </div>
+                
+                <div class="section-body">
+                    <div *ngIf="requestsLoading" class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Loading requests...</p>
+                    </div>
+                    
+                    <div *ngIf="!requestsLoading && requests.length === 0" class="empty-state">
+                        <i class="bi bi-info-circle"></i>
+                        <p>No requests found for this employee.</p>
+                    </div>
+                    
+                    <div *ngIf="!requestsLoading && requests.length > 0" class="requests-table">
+                        <div class="table-header">
+                            <div class="table-cell">Type</div>
+                            <div class="table-cell">Status</div>
+                            <div class="table-cell">Created</div>
+                            <div class="table-cell">Items</div>
+                            <div class="table-cell">Details</div>
+                        </div>
+                        
+                        <div class="table-row" *ngFor="let request of requests">
+                            <div class="table-cell"><strong>{{request.type}}</strong></div>
+                            <div class="table-cell">
+                                <span class="status-badge" 
+                                      [ngClass]="{
+                                        'status-pending': request.status === 'Pending',
+                                        'status-approved': request.status === 'Approved',
+                                        'status-rejected': request.status === 'Rejected'
+                                      }">
+                                    {{request.status}}
+                                </span>
+                            </div>
+                            <div class="table-cell">{{request.created | date:'medium'}}</div>
+                            <div class="table-cell">{{request.requestItems?.length || 0}}</div>
+                            <div class="table-cell">
+                                <a routerLink="/request/details/{{request.id}}" class="view-btn">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="back-action">
+                <button type="button" (click)="goBackToEmployees()" class="back-btn">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Back to Employees</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.employee-details-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.employee-details-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 1rem;
+}
+
+.loading-state p {
+    margin: 0;
+    color: #495057;
+}
+
+.spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid rgba(67, 97, 238, 0.2);
+    border-radius: 50%;
+    border-top-color: #4361ee;
+    animation: spin 1s linear infinite;
+}
+
+.details-section {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #f1f3f5;
+    padding-bottom: 1.5rem;
+}
+
+.details-section:last-child {
+    border-bottom: none;
+}
+
+.section-header {
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
+    padding: 1rem 1.5rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: 8px 8px 0 0;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    flex-grow: 1;
+}
+
+.section-header i {
+    font-size: 1.25rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.section-body {
+    padding: 1.5rem;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.details-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.detail-label {
+    font-weight: 500;
+    color: #495057;
+    min-width: 120px;
+}
+
+.detail-value {
+    color: #212529;
+}
+
+.empty-state {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 1.25rem;
+}
+
+.empty-state p {
+    margin: 0;
+}
+
+.workflows-table, .requests-table {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table-header {
+    display: flex;
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table-row {
+    display: flex;
+    border-top: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease;
+}
+
+.table-row:hover {
+    background-color: #f8f9fa;
+}
+
+.table-cell {
+    padding: 1rem;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-on-leave {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.status-terminated {
+    background-color: #dc3545;
+    color: white;
+}
+
+.status-pending {
+    background-color: #4361ee;
+    color: white;
+}
+
+.status-approved {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-rejected {
+    background-color: #dc3545;
+    color: white;
+}
+
+.edit-btn, .transfer-btn, .new-btn, .view-btn, .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+
+.edit-btn {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #e2e8f0;
+}
+
+.transfer-btn {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #e2e8f0;
+}
+
+.new-btn {
+    background: #4361ee;
+    color: white;
+    border: none;
+}
+
+.view-btn {
+    background: transparent;
+    color: #4361ee;
+    border: 1px solid #4361ee;
+    padding: 0.25rem 0.5rem;
+}
+
+.back-btn {
+    background: #f8f9fa;
+    color: #495057;
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 1.5rem;
+}
+
+.edit-btn:hover, .transfer-btn:hover, .back-btn:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.new-btn:hover {
+    background: #3a0ca3;
+    transform: translateY(-2px);
+}
+
+.view-btn:hover {
+    background: rgba(67, 97, 238, 0.1);
+}
+
+.back-action {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 2rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .table-header, .table-row {
+        flex-direction: column;
+    }
+    
+    .table-cell {
+        padding: 0.75rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+    
+    .edit-btn, .transfer-btn, .new-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
