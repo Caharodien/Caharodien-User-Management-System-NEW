@@ -30,38 +30,8 @@ async function authenticate({ email, password, ipAddress }) {
     if (!account || !account.isVerified || (!await bcrypt.compare(password, account.passwordHash))) {
     throw 'Email or password is incorrect';
     }
-<<<<<<< HEAD
-    console.log(`Account found, details:`);
-    console.log(`- Email: ${account.email}`);
-    console.log(`- Verified field: ${account.verified}`);
-    console.log(`- PasswordReset field: ${account.passwordReset}`);
-    console.log(`- isVerified computed value: ${account.isVerified}`);
-    
-    if (account.role !== Role.Admin && account.isActive === false) {
-        console.log(`Account ${email} is deactivated`);
-        throw 'Your account has been deactivated. Please contact an administrator.';
-    }
-    
-    if (account.verified || account.passwordReset) {
-        console.log('Manually verifying account based on verified/passwordReset fields');
-        account.isVerified = true;
-    }
-    
-    if (!account.isVerified) {
-        console.log(`Account ${email} is not verified`);
-        throw 'Please verify your email before logging in';
-    }
-    
-    const passwordValid = await bcrypt.compare(password, account.passwordHash);
-    if (!passwordValid) {
-        console.log(`Invalid password for ${email}`);
-        throw 'Email or password is incorrect';
-    }
-    
-=======
 
     // authentication successful so generate jwt and refresh tokens
->>>>>>> 384b3717032c7c1e722fda52b43beb7d3ade4311
     const jwtToken = generateJwtToken(account);
     const refreshToken = generateRefreshToken(account, ipAddress);
 
@@ -231,14 +201,6 @@ async function update(id, params) {
 
 async function _delete(id) {
     const account = await getAccount(id);
-<<<<<<< HEAD
-    
-    if (account.role === Role.Admin) {
-        throw 'Admin accounts cannot be deleted';
-    }
-    
-=======
->>>>>>> 384b3717032c7c1e722fda52b43beb7d3ade4311
     await account.destroy();
 }
 
@@ -286,38 +248,6 @@ function basicDetails(account) {
 
 async function sendVerificationEmail(account, origin) {
     let message;
-<<<<<<< HEAD
-
-    if (!account || !account.email) {
-        console.error('Cannot send verification email: account or email is missing');
-        throw new Error('No recipients defined');
-    }
-
-    const backendUrl = process.env.NODE_ENV === 'production'
-        ? 'https://caharodien-user-management-system-new.onrender.com' 
-        : 'http://localhost:4000';
-    
-    const verifyUrl = `${backendUrl}/accounts/verify-email?token=${account.verificationToken}&origin=${encodeURIComponent(origin)}`;
-    
-    message = `<p>Please click the below link to verify your email address:</p>
-               <p><a href="${verifyUrl}">${verifyUrl}</a></p>`;
-     
-    console.log(`Sending verification email to: ${account.email}`);
-    
-    try {
-        await sendEmail({
-            to: account.email,
-            subject: 'Sign-up Verification API - Verify Email',
-            html: `<h4>Verify Email</h4>
-                   <p>Thanks for registering!</p>
-                   ${message}`
-        });
-        console.log(`Verification email sent successfully to ${account.email}`);
-    } catch (error) {
-        console.error(`Failed to send verification email to ${account.email}:`, error);
-        throw error;
-    }
-=======
     if (origin) {
         const verifyUrl = `${origin}/account/verify-email?token=${account.verificationToken}`;
         message = `<p>Please click the below Link to verify your email address:</p>
@@ -334,7 +264,6 @@ async function sendVerificationEmail(account, origin) {
                <p>Thanks for registering!</p>
                ${message}`
     });
->>>>>>> 384b3717032c7c1e722fda52b43beb7d3ade4311
 }
 
 async function sendAlreadyRegisteredEmail(email, origin) {
