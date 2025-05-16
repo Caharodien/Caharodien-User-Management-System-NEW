@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
         "database": {
             "host": "153.92.15.31",
             "port": 3306,
@@ -19,24 +18,3 @@
             }
     
         }
-=======
-    "database": {
-        "host": "153.92.15.31",
-        "port": 3306,
-        "user": "u875409848_amama",
-        "password": "m>G>4T42",
-        "database": "u875409848_amama"
-    },
-        "secret": "TcxtoIgRRbUqqgW174x1zAA==",
-        "emailFrom": "usermanagementsystem.amama.1wellplayed@gmail.com",
-        "smtpOptions": {  
-        "host": "smtp.gmail.com",
-        "port": 587,
-        "auth": {
-        "user": "amama.1wellplayed@gmail.com",
-        "pass": "bcpk tlis uicq bagf"
-        }
-        }
-
-    }
->>>>>>> 3ff026b10d1c5b0e8e5068e54a7cce7fa532e1ef
