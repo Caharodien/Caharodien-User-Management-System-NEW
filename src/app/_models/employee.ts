@@ -4,13 +4,20 @@ export class Employee {
     employeeId!: string;  
     position!: string;    
     departmentId!: number;
-    firstName!: string;  
-    lastName!: string;   
+    firstName?: string;  
+    lastName?: string;   
     email?: string;       
     hireDate!: Date;      
     status: string = 'Active';
     created?: Date;
     department?: Department;
+
+        account?: {
+        id?: number;
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+    };
 }
 
 export class EmployeeCreate {
