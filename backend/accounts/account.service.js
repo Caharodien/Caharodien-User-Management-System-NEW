@@ -25,27 +25,6 @@ module.exports = {
 };
 
 async function authenticate({ email, password, ipAddress }) {
-<<<<<<< HEAD
-    const account = await db.Account.scope('withHash').findOne({ where: { email } });
-
-    if (!account || !account.isVerified || (!await bcrypt.compare(password, account.passwordHash))) {
-    throw 'Email or password is incorrect';
-    }
-
-    // authentication successful so generate jwt and refresh tokens
-    const jwtToken = generateJwtToken(account);
-    const refreshToken = generateRefreshToken(account, ipAddress);
-
-    // save refresh token
-    await refreshToken.save();
-
-    // return basic details and tokens
-    return {
-    ...basicDetails(account),
-    jwtToken,
-    refreshToken: refreshToken.token
-};
-=======
     try {
         console.log(`Login attempt for ${email}`);
         
@@ -127,7 +106,6 @@ async function authenticate({ email, password, ipAddress }) {
         
         throw 'Authentication failed. Please try again later.';
     }
->>>>>>> 3ff026b10d1c5b0e8e5068e54a7cce7fa532e1ef
 }
 
 async function refreshToken({ token, ipAddress }) {
@@ -341,15 +319,6 @@ async function sendVerificationEmail(account, origin) {
                    <p><code>${account.verificationToken}</code></p>`;
     }
 
-<<<<<<< HEAD
-    await sendEmail({
-        to: account.email,
-        subject: 'Sign-up Verification API - Verify Email',
-        html: `<h4>Verify Email</h4>
-               <p>Thanks for registering!</p>
-               ${message}`
-    });
-=======
     const backendUrl = process.env.NODE_ENV === 'production'
         ? 'https://caharodien-user-management-system-new.onrender.com' 
         : 'http://localhost:4000';
@@ -374,7 +343,6 @@ async function sendVerificationEmail(account, origin) {
         console.error(`Failed to send verification email to ${account.email}:`, error);
         throw error;
     }
->>>>>>> 3ff026b10d1c5b0e8e5068e54a7cce7fa532e1ef
 }
 
 async function sendAlreadyRegisteredEmail(email, origin) {

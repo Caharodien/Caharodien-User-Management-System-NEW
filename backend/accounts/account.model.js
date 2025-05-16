@@ -23,27 +23,14 @@ function model(sequelize) {
             get() { return !!(this.verified || this.passwordReset); }
         }
     };
-<<<<<<< HEAD
-=======
-
->>>>>>> 3ff026b10d1c5b0e8e5068e54a7cce7fa532e1ef
     const options = {
         // disable default timestamp fields (createdAt and updatedAt)
         timestamps: false,
         defaultScope: {
-<<<<<<< HEAD
-        // exclude password hash by default
-        attributes: { exclude: ['passwordHash'] }
-        },
-        scopes: {
-        // include hash with this scope
-        withHash: { attributes: {}, } 
-=======
             attributes: { exclude: ['passwordHash'] }
         },
         scopes: {
             withHash: { attributes: { include: ['passwordHash'] } }
->>>>>>> 3ff026b10d1c5b0e8e5068e54a7cce7fa532e1ef
         }
     };
     return sequelize.define('account', attributes, options);
