@@ -1,0 +1,669 @@
+# Employee Management API documentation
+
+paths:
+  /departments:
+    post:
+      summary: Create a new department
+      description: Admin users can create new departments.
+      operationId: createDepartment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Human Resources"
+                description:
+                  type: string
+                  example: "Manages employee relations, recruitment, and training"
+              required:
+                - name
+      responses:
+        "201":
+          description: Department created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+        "400":
+          description: Department already exists or invalid input
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    get:
+      summary: Get all departments
+      description: Get a list of all departments.
+      operationId: getDepartments
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of departments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Department"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+  
+  /departments/{id}:
+    parameters:
+      - in: path
+        name: id
+        description: Department ID
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get a department by ID
+      description: Get a specific department by its ID.
+      operationId: getDepartmentById
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Department details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+        "404":
+          description: Department not found
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    put:
+      summary: Update a department
+      description: Admin users can update department details.
+      operationId: updateDepartment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Human Resources"
+                description:
+                  type: string
+                  example: "Manages employee relations, recruitment, and training"
+      responses:
+        "200":
+          description: Department updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+        "404":
+          description: Department not found
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    delete:
+      summary: Delete a department
+      description: Admin users can delete departments.
+      operationId: deleteDepartment
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Department deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Department deleted"
+        "404":
+          description: Department not found
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /employees:
+    post:
+      summary: Create a new employee
+      description: Admin users can create new employees.
+      operationId: createEmployee
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeCreate"
+      responses:
+        "201":
+          description: Employee created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+        "400":
+          description: Employee already exists or invalid input
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    get:
+      summary: Get all employees
+      description: Get a list of all employees.
+      operationId: getEmployees
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of employees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Employee"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /employees/{id}:
+    parameters:
+      - in: path
+        name: id
+        description: Employee ID
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get an employee by ID
+      description: Get a specific employee by their ID.
+      operationId: getEmployeeById
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Employee details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+        "404":
+          description: Employee not found
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    put:
+      summary: Update an employee
+      description: Admin users can update employee details.
+      operationId: updateEmployee
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmployeeUpdate"
+      responses:
+        "200":
+          description: Employee updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Employee"
+        "404":
+          description: Employee not found
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    delete:
+      summary: Delete an employee
+      description: Admin users can delete employees.
+      operationId: deleteEmployee
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Employee deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Employee deleted"
+        "404":
+          description: Employee not found
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /employees/{id}/transfer:
+    parameters:
+      - in: path
+        name: id
+        description: Employee ID
+        required: true
+        schema:
+          type: integer
+    post:
+      summary: Transfer an employee to another department
+      description: Admin users can transfer employees between departments.
+      operationId: transferEmployee
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                departmentId:
+                  type: integer
+                  example: 2
+              required:
+                - departmentId
+      responses:
+        "200":
+          description: Employee transferred
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Employee transferred"
+        "404":
+          description: Employee not found
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /workflows:
+    post:
+      summary: Create a new workflow
+      description: Admin users can create new workflows.
+      operationId: createWorkflow
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowCreate"
+      responses:
+        "201":
+          description: Workflow created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workflow"
+        "400":
+          description: Invalid input
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    get:
+      summary: Get all workflows
+      description: Get a list of all workflows.
+      operationId: getWorkflows
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of workflows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Workflow"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /requests:
+    post:
+      summary: Create a new request
+      description: Users can create new requests.
+      operationId: createRequest
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestCreate"
+      responses:
+        "201":
+          description: Request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Request"
+        "400":
+          description: Invalid input
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    get:
+      summary: Get all requests
+      description: Get a list of requests. Admin users see all requests, others see only their own.
+      operationId: getRequests
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Request"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /requests/{id}/status:
+    parameters:
+      - in: path
+        name: id
+        description: Request ID
+        required: true
+        schema:
+          type: integer
+    put:
+      summary: Update request status
+      description: Admin users can approve or reject requests.
+      operationId: updateRequestStatus
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [Pending, Approved, Rejected]
+                  example: "Approved"
+                comments:
+                  type: string
+                  example: "Equipment approved and ordered."
+              required:
+                - status
+      responses:
+        "200":
+          description: Request status updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Request"
+        "404":
+          description: Request not found
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+components:
+  schemas:
+    EmployeeCreate:
+      type: object
+      properties:
+        accountId:
+          type: integer
+          example: 5
+        employeeId:
+          type: string
+          example: "EMP001"
+        position:
+          type: string
+          example: "HR Manager"
+        departmentId:
+          type: integer
+          example: 4
+        hireDate:
+          type: string
+          format: date
+          example: "2023-01-15"
+      required:
+        - accountId
+        - employeeId
+        - position
+        - hireDate
+
+    EmployeeUpdate:
+      type: object
+      properties:
+        position:
+          type: string
+          example: "Senior HR Manager"
+        departmentId:
+          type: integer
+          example: 4
+        status:
+          type: string
+          enum: [Active, On Leave, Terminated]
+          example: "Active"
+
+    Employee:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        employeeId:
+          type: string
+          example: "EMP001"
+        position:
+          type: string
+          example: "HR Manager"
+        departmentId:
+          type: integer
+          example: 4
+        hireDate:
+          type: string
+          format: date
+          example: "2023-01-15"
+        status:
+          type: string
+          enum: [Active, On Leave, Terminated]
+          example: "Active"
+        created:
+          type: string
+          format: date-time
+          example: "2023-01-15T08:30:00Z"
+        accountId:
+          type: integer
+          example: 5
+        account:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 5
+            email:
+              type: string
+              example: "admin@email.com"
+            firstName:
+              type: string
+              example: "John"
+            lastName:
+              type: string
+              example: "Doe"
+        department:
+          $ref: "#/components/schemas/Department"
+
+    Department:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 4
+        name:
+          type: string
+          example: "Human Resources"
+        description:
+          type: string
+          example: "Manages employee relations, recruitment, and training"
+        created:
+          type: string
+          format: date-time
+          example: "2023-01-15T08:30:00Z"
+        employees:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              employeeId:
+                type: string
+              position:
+                type: string
+
+    WorkflowCreate:
+      type: object
+      properties:
+        employeeId:
+          type: integer
+          example: 1
+        type:
+          type: string
+          enum: [Onboarding, Transfer, Status Change, Termination]
+          example: "Onboarding"
+        details:
+          type: object
+          example: {"tasks": ["Setup workspace", "IT orientation", "HR paperwork"]}
+      required:
+        - employeeId
+        - type
+
+    Workflow:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        employeeId:
+          type: integer
+          example: 1
+        type:
+          type: string
+          enum: [Onboarding, Transfer, Status Change, Termination]
+          example: "Onboarding"
+        status:
+          type: string
+          enum: [Pending, Approved, Rejected]
+          example: "Pending"
+        details:
+          type: object
+          example: {"tasks": ["Setup workspace", "IT orientation", "HR paperwork"]}
+        created:
+          type: string
+          format: date-time
+          example: "2023-01-15T08:30:00Z"
+        employee:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            employeeId:
+              type: string
+              example: "EMP001"
+            position:
+              type: string
+              example: "HR Manager"
+
+    RequestCreate:
+      type: object
+      properties:
+        employeeId:
+          type: integer
+          example: 1
+        type:
+          type: string
+          enum: [Equipment, Leave, Resources, Other]
+          example: "Equipment"
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Laptop"
+              description:
+                type: string
+                example: "Dell XPS 15"
+              quantity:
+                type: integer
+                example: 1
+      required:
+        - employeeId
+        - type
+
+    RequestItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Laptop"
+        description:
+          type: string
+          example: "Dell XPS 15"
+        quantity:
+          type: integer
+          example: 1
+        requestId:
+          type: integer
+          example: 1
+
+    Request:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        employeeId:
+          type: integer
+          example: 1
+        type:
+          type: string
+          enum: [Equipment, Leave, Resources, Other]
+          example: "Equipment"
+        status:
+          type: string
+          enum: [Pending, Approved, Rejected]
+          example: "Pending"
+        comments:
+          type: string
+          example: "Equipment needed for new hire"
+        created:
+          type: string
+          format: date-time
+          example: "2023-01-15T08:30:00Z"
+        employee:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            employeeId:
+              type: string
+              example: "EMP001"
+            position:
+              type: string
+              example: "HR Manager"
+        requestItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequestItem"
