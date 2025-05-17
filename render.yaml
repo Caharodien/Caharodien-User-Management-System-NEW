@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: user-management-system
+    name: user-management-systems
     env: node
     buildCommand: npm install
     startCommand: node server.js

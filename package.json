@@ -1,5 +1,5 @@
 {
-  "name": "user-management-system",
+  "name": "user-management-systems",
   "version": "1.0.0",
   "description": "NodeJS and MySQL API for Email Sign Up with Verification, Authentication & Forgot Password",
   "license": "MIT",
